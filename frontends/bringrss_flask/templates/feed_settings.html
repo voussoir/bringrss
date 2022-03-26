@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html>
+<head>
+    {% import "header.html" as header %}
+    <title>{{feed.display_name}}</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <link rel="icon" href="/favicon.png" type="image/png"/>
+    <link rel="stylesheet" href="/static/css/common.css">
+    <link rel="stylesheet" href="/static/css/bringrss.css">
+    {% if theme %}<link rel="stylesheet" href="/static/css/theme_{{theme}}.css">{% endif %}
+    <script src="/static/js/common.js"></script>
+    <script src="/static/js/api.js"></script>
+    <script src="/static/js/spinners.js"></script>
+
+<style>
+p, pre
+{
+    margin-top: 0;
+    margin-bottom: 0;
+}
+h1:first-child
+{
+    margin-top: 0;
+}
+
+#feed,
+.group
+{
+    display: grid;
+    grid-auto-flow: row;
+    grid-gap: 8px;
+}
+
+#set_title_input,
+#set_rss_url_input,
+#set_web_url_input
+{
+    width: 100%;
+    max-width: 400px;
+}
+
+#set_http_headers_input
+{
+    width: 100%;
+    max-width: 400px;
+    height: 150px;
+}
+
+#set_autorefresh_interval_inputs input
+{
+    width: 3em;
+    text-align: right;
+}
+.group
+{
+    border:  1px solid var(--color_highlight);
+    border-radius: 4px;
+    padding: 4px;
+}
+#filters_group h2:first-child,
+.group h2:first-child
+{
+    margin-top: 0;
+}
+
+#filters .filter
+{
+    margin: 8px;
+    padding: 8px;
+    max-width: 500px;
+    background-color: var(--color_transparency);
+    display: grid;
+    grid-auto-columns: 1fr auto auto;
+    grid-column-gap: 8px;
+    grid-auto-flow: column;
+}
+#filters .filter .name,
+#filters .filter .edit_link
+{
+    align-self: center;
+}
+#filters #add_filter_select
+{
+    width: 200px;
+}
+#filter_rearrange_guideline
+{
+    display: none;
+    position: fixed;
+    border: 1px solid var(--color_text_normal);
+    z-index: -1;
+}
+</style>
+</head>
+
+<body>
+{{header.make_header(site=site, request=request)}}
+<div id="content_body">
+    <div id="feed" class="panel" data-id="{{feed.id}}">
+        <h1 id="feed_title_header">{{feed.display_name}}</h1>
+        <p>ID: <code>{{feed.id}}</code></p>
+
+        {% if feed.description %}
+        <p>{{feed.description}}</p>
+        {% endif %}
+
+        <div>
+            <input type="text" id="set_title_input" placeholder="Title" value="{{feed.title or ''}}" data-bind-enter-to-button="set_title_button"/>
+            <button id="set_title_button" class="button_with_spinner" data-spinner-text="⌛" onclick="return set_title_form(event);">Set title</button>
+        </div>
+        <div>
+            <input type="text" id="set_rss_url_input" placeholder="RSS URL" value="{{feed.rss_url or ''}}" data-bind-enter-to-button="set_rss_url_button"/>
+            <button id="set_rss_url_button" class="button_with_spinner" data-spinner-text="⌛" onclick="return set_rss_url_form(event);">Set RSS URL</button>
+        </div>
+        <div>
+            <input type="text" id="set_web_url_input" placeholder="Web URL" value="{{feed.web_url or ''}}" data-bind-enter-to-button="set_web_url_button"/>
+            <button id="set_web_url_button" class="button_with_spinner" data-spinner-text="⌛" onclick="return set_web_url_form(event);">Set Web URL</button>
+        </div>
+
+        <div>
+            <img id="icon_img" src="/feed/{{feed.id}}/icon.png"/>
+            <input id="set_icon_input" type="file"/>
+            <button id="set_icon_button" class="button_with_spinner" data-spinner-text="⌛" onclick="return set_icon_form(event)">Set icon</button>
+        </div>
+
+        {% set autorefresh_group_hidden = '' if feed.rss_url else 'hidden' %}
+        <div id="autorefresh_group" class="group {{autorefresh_group_hidden}}">
+            {% set checked = 'checked' if feed.autorefresh_interval > 0 else '' %}
+            <span>
+            <label><input type="checkbox" {{checked}} onchange="return set_autorefresh_enabled_form(event);"/> Automatically refresh this feed regularly.</label>
+            <span id="set_autorefresh_enabled_spinner" class="hidden">⌛</span>
+            </span>
+
+            {% set autorefresh_interval_hidden = '' if checked else 'hidden' %}
+            <p id="set_autorefresh_interval_inputs" class="{{autorefresh_interval_hidden}}">
+                {% set interval = feed.autorefresh_interval|abs %}
+                {% set hours = (interval / 3600)|int %}
+                {% set minutes = ((interval % 3600) / 60)|int %}
+                Refresh every
+                <input type="number" min="0" id="autorefresh_input_hours" size="4" value="{{hours}}"/> hours,
+                <input type="number" min="0" id="autorefresh_input_minutes" size="4" value="{{minutes}}"/> minutes
+                <button class="button_with_spinner" data-spinner-text="⌛" onclick="return set_autorefresh_interval_form(event);">Set autorefresh</button>
+            </p>
+            <p>Note: autorefresh is not inherited from parent to child. When you manually click the refresh button on a parent, its children will also be refreshed, but if the parent is refreshed automatically, the children will wait for their own autorefresh.</p>
+
+            {% if feed.last_refresh %}
+            <p>Last refresh: {{feed.last_refresh|timestamp_to_8601_local}}</p>
+            {% endif %}
+
+            {% if feed.next_refresh < INF %}
+            <p>Next refresh: {{feed.next_refresh|timestamp_to_8601_local}}</p>
+            {% endif %}
+
+            {% if feed.last_refresh_error %}
+            <p>The last refresh attempt at {{feed.last_refresh_attempt|timestamp_to_8601_local}} encountered the following error:</p>
+            <pre>
+                {{-feed.last_refresh_error|trim-}}
+            </pre>
+            {% endif %}
+        </div>
+
+        <div class="group">
+            {% set checked = 'checked' if feed.refresh_with_others else '' %}
+            <span>
+                <label><input type="checkbox" {{checked}} onchange="return set_refresh_with_others_form(event);"/> Refresh this feed and its children when I refresh its parent or press the "Refresh all" button.</label>
+                <span id="set_refresh_with_others_spinner" class="hidden">⌛</span>
+            </span>
+            <p>If disabled, this feed will only be refreshed when you click its own refresh button, or when its autorefresh timer is ready.</p>
+        </div>
+
+        <div id="isolate_guids_group" class="group">
+            {% set checked = 'checked' if feed.isolate_guids else '' %}
+            <span>
+            <label><input type="checkbox" {{checked}} onchange="return set_isolate_guids_form(event);"/> Isolate RSS GUIDs from other feeds.</label>
+            <span id="set_isolate_guids_spinner" class="hidden">⌛</span>
+            </span>
+            <p>When feeds are refreshed, the system uses GUIDs and other news attributes to detect which items are new and which are duplicates from the previous refresh.</p>
+            <p>If the feed is isolated, the GUIDs will only be used to search for duplicates within this feed. If the feed is not isolated, the GUIDs will be used to search for duplicates among all news in the database.</p>
+            <p>If you have two feeds that may produce the same items (e.g. two newspaper category feeds, and a news article belongs to both categories), this setting will control whether the news item appears in both feeds or just the one that got it first.</p>
+        </div>
+
+        <div id="filters_group" class="group">
+            <h2>Filters</h2>
+            <p>Filters will execute in the order they are listed here:</p>
+            <div id="filter_rearrange_guideline"></div>
+            <div
+                id="filters"
+                ondragstart="return filter_drag_start(event);"
+                ondragend="return filter_drag_end(event);"
+                ondragover="return filter_drag_over(event);"
+                ondragenter="return filter_drag_enter(event);"
+                ondragleave="return filter_drag_leave(event);"
+                ondrop="return filter_drag_drop(event);"
+            >
+                {% for filt in feed_filters %}
+                <div class="filter" data-id="{{filt.id}}" draggable="true">
+                <span class="name">{{filt.display_name}}</span>
+                <a class="edit_link" href="/filter/{{filt.id}}">Edit</a>
+                <button
+                class="red_button button_with_confirm"
+                data-prompt="Remove this filter?"
+                data-onclick="return remove_filter_form(event);"
+                >Remove</button>
+                </div>
+                {% endfor %}
+            </div>
+            <select id="add_filter_select" onchange="return add_filter_form(event);">
+                <option value="">Add another filter</option>
+                {% for filt in available_filters %}
+                <option value="{{filt.id}}">{{filt.display_name}}</option>
+                {% endfor %}
+            </select>
+            <span id="set_filters_spinner" class="hidden">⌛</span>
+        </div>
+
+        {% set http_headers_hidden = '' if feed.rss_url else 'hidden' %}
+        <div id="http_headers_group" class="group {{http_headers_hidden}}">
+            <p>If you need to define additional HTTP headers which will be sent on every refresh request for this feed, you can add them below. Write one header per line like <code>Key: value</code>, e.g. <code>Host: example.com</code></p>
+            <textarea id="set_http_headers_input" placeholder="HTTP headers" data-bind-ctrl-enter-to-button="set_http_headers_button">{{feed.http_headers|http_headers_dict_to_lines}}</textarea>
+            <button id="set_http_headers_button" class="button_with_spinner" data-spinner-text="⌛" onclick="return set_http_headers_form(event);">Set HTTP headers</button>
+        </div>
+
+        <div>
+            <button
+            class="red_button button_with_confirm"
+            data-prompt="Delete feed and all associated news?"
+            data-onclick="return delete_feed_form(event);"
+            >Delete feed</button>
+        </div>
+    </div>
+</div>
+</body>
+
+<script type="text/javascript">
+const FEED_ID = {{feed.id}};
+const set_autorefresh_enabled_spinner = new spinners.Spinner(document.getElementById("set_autorefresh_enabled_spinner"));
+const set_refresh_with_others_spinner = new spinners.Spinner(document.getElementById("set_refresh_with_others_spinner"));
+const set_isolate_guids_spinner = new spinners.Spinner(document.getElementById("set_isolate_guids_spinner"));
+
+const filter_rearrange_guideline = document.getElementById("filter_rearrange_guideline");
+
+function read_autorefresh_inputs()
+{
+    const hours = parseInt(document.getElementById("autorefresh_input_hours").value);
+    const minutes = parseInt(document.getElementById("autorefresh_input_minutes").value);
+    return (hours * 3600) + (minutes * 60);
+}
+
+function write_autorefresh_inputs(interval)
+{
+    document.getElementById("autorefresh_input_hours").value = Math.floor(interval / 3600);
+    document.getElementById("autorefresh_input_minutes").value = Math.ceil((interval % 3600) / 60);
+}
+
+function set_autorefresh_enabled_form(event)
+{
+    function callback(response)
+    {
+        set_autorefresh_enabled_spinner.hide();
+        if (response.meta.status != 200 || ! response.meta.json_ok)
+        {
+            alert(JSON.stringify(response));
+            return;
+        }
+        const interval = response.data.autorefresh_interval;
+        if (interval > 0)
+        {
+            inputs.classList.remove("hidden");
+            write_autorefresh_inputs(interval);
+        }
+        else
+        {
+            inputs.classList.add("hidden");
+        }
+    }
+    const inputs = document.getElementById("set_autorefresh_interval_inputs");
+    if (event.target.checked)
+    {
+        inputs.classList.remove("hidden");
+        if (read_autorefresh_inputs() === 0)
+        {
+            write_autorefresh_inputs(86400);
+        }
+    }
+    else
+    {
+        const value = -1 * read_autorefresh_inputs();
+        set_autorefresh_enabled_spinner.show();
+        api.feeds.set_autorefresh_interval(FEED_ID, value, callback);
+    }
+}
+
+function set_autorefresh_interval_form(event)
+{
+    function callback(response)
+    {
+        spinners.close_button_spinner(button);
+        if (response.meta.status != 200 || ! response.meta.json_ok)
+        {
+            alert(JSON.stringify(response));
+            return;
+        }
+    }
+    const button = event.target;
+    const value = read_autorefresh_inputs();
+    api.feeds.set_autorefresh_interval(FEED_ID, value, callback);
+}
+
+function set_http_headers_form(event)
+{
+    function callback(response)
+    {
+        spinners.close_button_spinner(button);
+        if (response.meta.status != 200 || ! response.meta.json_ok)
+        {
+            alert(JSON.stringify(response));
+            return;
+        }
+        if (input.value !== http_headers)
+        {
+            // Don't overwrite the text if they have already started changing it.
+            return;
+        }
+        const lines = [];
+        for (const [key, value] of Object.entries(response.data.http_headers))
+        {
+            lines.push(`${key}: ${value}`);
+        }
+        input.value = lines.join("\n");
+    }
+    const button = document.getElementById("set_http_headers_button");
+    const input = document.getElementById("set_http_headers_input");
+    const http_headers = input.value;
+    api.feeds.set_http_headers(FEED_ID, http_headers, callback);
+}
+
+function set_icon_form(event)
+{
+    const button = document.getElementById("set_icon_button");
+    const input = document.getElementById("set_icon_input");
+    if (input.files.length == 0)
+    {
+        return spinners.BAIL;
+    }
+    const file = input.files[0];
+    const reader = new FileReader();
+    function callback(response)
+    {
+        spinners.close_button_spinner(button);
+        if (response.meta.status != 200 || ! response.meta.json_ok)
+        {
+            alert(JSON.stringify(response));
+            return;
+        }
+        const icon_url = `/feed/${FEED_ID}/icon.png`
+        const img = document.getElementById("icon_img");
+        promise = fetch(icon_url, {cache: "reload"});
+        promise.then(() => {img.src = icon_url});
+    }
+    reader.onload = function(event)
+    {
+        const image_base64 = reader.result;
+        api.feeds.set_icon(FEED_ID, image_base64, callback);
+    }
+    reader.readAsDataURL(file);
+}
+
+function set_isolate_guids_form(event)
+{
+    function callback(response)
+    {
+        set_isolate_guids_spinner.hide();
+        if (response.meta.status != 200 || ! response.meta.json_ok)
+        {
+            alert(JSON.stringify(response));
+            return;
+        }
+    }
+    set_isolate_guids_spinner.show();
+    const isolate_guids = Number(event.target.checked)
+    api.feeds.set_isolate_guids(FEED_ID, isolate_guids, callback);
+}
+
+function set_refresh_with_others_form(event)
+{
+    function callback(response)
+    {
+        set_refresh_with_others_spinner.hide();
+        if (response.meta.status != 200 || ! response.meta.json_ok)
+        {
+            alert(JSON.stringify(response));
+            return;
+        }
+    }
+    set_refresh_with_others_spinner.show();
+    api.feeds.set_refresh_with_others(FEED_ID, event.target.checked, callback);
+}
+
+function set_rss_url_form(event)
+{
+    const button = event.target;
+    function callback(response)
+    {
+        spinners.close_button_spinner(button);
+        if (response.meta.status != 200 || ! response.meta.json_ok)
+        {
+            alert(JSON.stringify(response));
+            return;
+        }
+        input.value = response.data.rss_url;
+        if (response.data.rss_url === null)
+        {
+            document.getElementById("autorefresh_group").classList.add("hidden");
+            document.getElementById("http_headers_group").classList.add("hidden");
+            document.getElementById("isolate_guids_group").classList.add("hidden");
+        }
+        else
+        {
+            document.getElementById("autorefresh_group").classList.remove("hidden");
+            document.getElementById("http_headers_group").classList.remove("hidden");
+            document.getElementById("isolate_guids_group").classList.remove("hidden");
+        }
+    }
+    const input = document.getElementById("set_rss_url_input");
+    const rss_url = input.value.trim();
+    api.feeds.set_rss_url(FEED_ID, rss_url, callback);
+}
+
+function set_title_form(event)
+{
+    const button = event.target;
+    function callback(response)
+    {
+        spinners.close_button_spinner(button);
+        if (response.meta.status != 200 || ! response.meta.json_ok)
+        {
+            alert(JSON.stringify(response));
+            return;
+        }
+        const header = document.getElementById("feed_title_header");
+        header.innerText = response.data.display_name;
+        document.title = response.data.display_name;
+        input.value = response.data.title;
+    }
+    const input = document.getElementById("set_title_input");
+    const title = input.value.trim();
+    api.feeds.set_title(FEED_ID, title, callback);
+}
+
+function set_web_url_form(event)
+{
+    const button = event.target;
+    function callback(response)
+    {
+        spinners.close_button_spinner(button);
+        if (response.meta.status != 200 || ! response.meta.json_ok)
+        {
+            alert(JSON.stringify(response));
+            return;
+        }
+        input.value = response.data.web_url;
+    }
+    const input = document.getElementById("set_web_url_input");
+    const web_url = input.value.trim();
+    api.feeds.set_web_url(FEED_ID, web_url, callback);
+}
+
+function add_filter_form(event)
+{
+    function callback(response)
+    {
+        set_filters_spinner.classList.add("hidden");
+        select.disabled = false;
+        if (response.meta.status !== 200 || ! response.meta.json_ok)
+        {
+            alert(JSON.stringify(response));
+            return;
+        }
+        const add_filter_select = document.getElementById("add_filter_select");
+        let selected_name;
+        const options = add_filter_select.getElementsByTagName("option");
+        for (const option of options)
+        {
+            if (option.value === selected_id)
+            {
+                option.parentElement.removeChild(option);
+                selected_name = option.innerText;
+                break;
+            }
+        }
+
+        const filter_div = document.createElement("div");
+        filter_div.classList.add("filter");
+        filter_div.dataset.id = selected_id;
+        filter_div.draggable = true;
+
+        const name = document.createElement("span");
+        name.classList.add("name");
+        name.innerText = selected_name;
+        filter_div.appendChild(name);
+
+        const edit_link = document.createElement("a");
+        edit_link.href = `/filter/${selected_id}`;
+        edit_link.classList.add("edit_link");
+        edit_link.innerText = "Edit";
+        filter_div.appendChild(edit_link);
+
+        const remove_button = document.createElement("button");
+        remove_button.classList.add("red_button");
+        remove_button.classList.add("button_with_confirm");
+        remove_button.innerText = "Remove";
+        remove_button.dataset.prompt = "Remove this filter?"
+        remove_button.dataset.onclick = "return remove_filter_form(event);";
+        filter_div.appendChild(remove_button);
+        common.init_button_with_confirm(remove_button);
+
+        filter_list.appendChild(filter_div);
+    }
+    if (event.target.value === "")
+    {
+        return;
+    }
+    const select = event.target;
+    const filter_list = document.getElementById("filters");
+    const selected_id = select.value;
+    const filter_ids = [];
+    for (const filter of filter_list.querySelectorAll(".filter"))
+    {
+        filter_ids.push(filter.dataset.id);
+    }
+    filter_ids.push(selected_id);
+    api.feeds.set_filters(FEED_ID, filter_ids, callback);
+
+    const set_filters_spinner = document.getElementById("set_filters_spinner");
+    set_filters_spinner.classList.remove("hidden");
+    select.disabled = true;
+}
+
+function remove_filter_form(event)
+{
+    function callback(response)
+    {
+        if (response.meta.status !== 200 || ! response.meta.json_ok)
+        {
+            alert(JSON.stringify(response));
+            return;
+        }
+        const new_option = document.createElement("option");
+        new_option.value = deleting_filter.dataset.id;
+        new_option.innerText = deleting_filter.querySelector(".name").innerText;
+        document.getElementById("add_filter_select").appendChild(new_option);
+
+        filter_list.removeChild(deleting_filter);
+    }
+
+    const button = event.target;
+    const deleting_filter = button.closest(".filter");
+
+    const filter_list = document.getElementById("filters");
+    const filter_ids = [];
+    for (const filter of filter_list.querySelectorAll(".filter"))
+    {
+        if (filter === deleting_filter)
+        {
+            continue;
+        }
+        filter_ids.push(filter.dataset.id);
+    }
+    api.feeds.set_filters(FEED_ID, filter_ids, callback);
+}
+
+let dragging_filter = null;
+function filter_drag_start(event)
+{
+    const filter = event.target.closest(".filter");
+    if (! filter)
+    {
+        return false;
+    }
+    dragging_filter = filter;
+}
+function filter_drag_end(event)
+{
+    dragging_filter = null;
+    filter_rearrange_guideline.style.display = "";
+}
+function filter_drag_above_below(event, target)
+{
+    const target_rect = target.getBoundingClientRect();
+    const cursor_y_percentage = (event.clientY - target_rect.y) / target.offsetHeight;
+    if (cursor_y_percentage < 0.5)
+    {
+        return "above";
+    }
+    else
+    {
+        return "below";
+    }
+}
+function filter_drag_over(event)
+{
+    const target = event.target.closest(".filter");
+    if (! target)
+    {
+        return false;
+    }
+    if (target === dragging_filter)
+    {
+        filter_rearrange_guideline.style.display = "";
+        return false;
+    }
+
+    event.preventDefault();
+
+    filter_rearrange_guideline.style.display = "block";
+
+    const target_rect = target.getBoundingClientRect();
+    const cursor_y_percentage = (event.clientY - target_rect.y) / target.offsetHeight;
+    const drag_position = filter_drag_above_below(event, target);
+    if (drag_position == "above")
+    {
+        filter_rearrange_guideline.style.width = target_rect.width + "px";
+        filter_rearrange_guideline.style.height = "0px";
+        filter_rearrange_guideline.style.left = target_rect.x + "px";
+        filter_rearrange_guideline.style.top = (target_rect.y - 4) + "px";
+    }
+    else
+    {
+        filter_rearrange_guideline.style.width = target_rect.width + "px";
+        filter_rearrange_guideline.style.height = "0px";
+        filter_rearrange_guideline.style.left = target_rect.x + "px";
+        filter_rearrange_guideline.style.top = (target_rect.y + target_rect.height + 4) + "px";
+    }
+}
+function filter_drag_enter(event)
+{
+}
+function filter_drag_leave(event)
+{
+}
+function filter_drag_drop(event)
+{
+    const dragged_filter = dragging_filter;
+    dragging_filter = null;
+
+    const filters = document.getElementById("filters");
+
+    if (event.target.closest(".filter"))
+    {
+        const target = event.target.closest(".filter");
+        if (target === dragged_filter)
+        {
+            return false;
+        }
+        event.preventDefault();
+        const target_rect = target.getBoundingClientRect();
+        const cursor_y_percentage = (event.clientY - target_rect.y) / target.offsetHeight;
+        const drag_position = filter_drag_above_below(event, target);
+        if (drag_position === "above")
+        {
+            filters.insertBefore(dragged_filter, target);
+        }
+        else
+        {
+            filters.removeChild(dragged_filter);
+            target.parentElement.insertBefore(dragged_filter, target.nextElementSibling);
+        }
+    }
+    else if (event.target.closest("#filters"))
+    {
+        let above_this = null;
+        for (const filter of filters.children)
+        {
+            if (filter === dragged_filter)
+            {
+                continue;
+            }
+            filter_rect = filter.getBoundingClientRect();
+            if (event.clientY < filter_rect.y)
+            {
+                above_this = filter;
+                break;
+            }
+        }
+        if (above_this)
+        {
+            filters.removeChild(dragged_filter);
+            above_this.parentElement.insertBefore(dragged_filter, above_this);
+        }
+        else
+        {
+            filters.removeChild(dragged_filter);
+            filters.appendChild(dragged_filter);
+        }
+    }
+
+    const set_filters_spinner = document.getElementById("set_filters_spinner");
+
+    function callback(response)
+    {
+        set_filters_spinner.classList.add("hidden");
+        if (response.meta.status != 200 || ! response.meta.json_ok)
+        {
+            alert(JSON.stringify(response));
+            return;
+        }
+    }
+    filter_rearrange_guideline.style.display = "";
+    const filter_ids = [];
+    for (const filter of filters.children)
+    {
+        filter_ids.push(filter.dataset.id);
+    }
+    api.feeds.set_filters(FEED_ID, filter_ids, callback);
+    set_filters_spinner.classList.remove("hidden");
+}
+
+function delete_feed_form(event)
+{
+    function callback(response)
+    {
+        if (response.meta.status !== 200 || ! response.meta.json_ok)
+        {
+            alert(JSON.stringify(response));
+            return;
+        }
+        window.location.href = "/";
+    }
+    api.feeds.delete(FEED_ID, callback);
+}
+
+function on_pageload()
+{
+}
+document.addEventListener("DOMContentLoaded", on_pageload);
+</script>
+</html>

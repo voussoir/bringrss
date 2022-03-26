@@ -1,0 +1,19 @@
+# For fetching feeds
+requests
+
+# For parsing RSS and Atom XML
+bs4
+
+# For parsing RSS published times
+python-dateutil
+
+# For running the webserver
+flask
+gevent
+werkzeug
+
+# For normalizing feed icons to 32x32 png
+pillow
+
+# My own variety toolkit
+voussoirkit

@@ -1,0 +1,2044 @@
+<!DOCTYPE html>
+<html>
+<head>
+    {% import "header.html" as header %}
+    <title>BringRSS</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <link rel="icon" href="/favicon.png" type="image/png"/>
+    <link rel="stylesheet" href="/static/css/common.css"/>
+    <link rel="stylesheet" href="/static/css/bringrss.css"/>
+    {% if theme %}<link rel="stylesheet" href="/static/css/theme_{{theme}}.css">{% endif %}
+    <script src="/static/js/common.js"></script>
+    <script src="/static/js/api.js"></script>
+    <script src="/static/js/contextmenus.js"></script>
+    <script src="/static/js/hotkeys.js"></script>
+    <script src="/static/js/spinners.js"></script>
+    <script src="/static/js/dompurify.js"></script>
+
+<style>
+body
+{
+    font-family: sans-serif;
+    font-size: 10pt;
+    max-height: 100%;
+}
+@media screen and (min-width: 800px)
+{
+    #content_body
+    {
+        grid-template:
+            "left right" minmax(0, 2fr)
+            "left newsreader" 1fr
+            /256px 1fr;
+
+        min-height: 0;
+    }
+}
+
+@media screen and (max-width: 800px)
+{
+    #content_body
+    {
+        grid-template:
+            "right" minmax(400px, 1fr)
+            "newsreader" 200px
+            "left" minmax(300px, auto)
+            /1fr;
+        min-height: 0;
+    }
+}
+
+#left, #right
+{
+    min-width: 0;
+    min-height: 0;
+}
+
+#left hr,
+#right hr
+{
+    grid-area: hr;
+    border-color: var(--color_transparency);
+    width: 100%;
+}
+#left
+{
+    grid-area: left;
+    position: relative;
+
+    display: grid;
+    grid-template:
+        "feed_toolbar" auto
+        "hr" auto
+        "feeds" 1fr
+        /1fr;
+}
+#right
+{
+    grid-area: right;
+    position: relative;
+
+    display: grid;
+    grid-template:
+        "news_toolbar" auto
+        "hr" auto
+        "news" 1fr
+        /1fr;
+}
+
+.contextmenu
+{
+    display: none;
+    background-color: var(--color_primary);
+    border: 1px solid var(--color_text_normal);
+    z-index: 1;
+    padding: 4px;
+}
+.contextmenu.open_contextmenu
+{
+    display: initial;
+    position: fixed;
+}
+
+.icon,
+.icon img
+{
+    max-height: 16px;
+    max-width: 16px;
+    object-fit: contain;
+}
+
+/* Feeds **********************************************************************/
+
+#feeds
+{
+    grid-area: feeds;
+    position: relative;
+
+    display: flex;
+    flex-direction: column;
+
+    line-height: 1.5em;
+    user-select: none;
+    min-height: 0;
+    min-width: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    /*scrollbar-width: thin;*/
+}
+/*#feeds::-webkit-scrollbar
+{
+    width: 8px;
+    background: var(--color_transparency);
+}
+#feeds::-webkit-scrollbar-thumb
+{
+    background: var(--color_transparency);
+}*/
+#feeds .feed
+{
+    display: grid;
+    grid-template:
+        "icon title refresh_spinner unread_count" auto
+        "descendants descendants descendants descendants" auto
+        /1.5em 1fr auto auto;
+    grid-column-gap: 0.5em;
+    cursor: pointer;
+}
+#feeds .feed.active
+{
+    background-color: var(--color_selection) !important;
+}
+#feeds .feed.active .title
+{
+    font-weight: bold;
+}
+#feeds .feed .icon
+{
+    grid-area: icon;
+    justify-self: center;
+    align-self: center;
+}
+#feeds .feed .title
+{
+    grid-area: title;
+}
+#feeds .feed.refresh_error .title
+{
+    color: red;
+}
+#feeds .feed .refresh_spinner
+{
+    grid-area: refresh_spinner;
+    align-self: center;
+}
+#feeds .feed .unread_count
+{
+    grid-area: unread_count;
+}
+#feeds .feed .descendants
+{
+    grid-area: descendants;
+    padding-left: 1em;
+}
+#feeds .feed.collapsed .descendants
+{
+    display: none;
+}
+
+#feeds .feed:nth-of-type(even)
+{
+    background-color: var(--color_transparency);
+}
+
+#feed_toolbar
+{
+    grid-area: feed_toolbar;
+}
+#feed_toolbar #feeds_loading_spinner
+{
+    float: right;
+}
+
+#feed_contextmenu
+{
+    grid-auto-flow: row;
+}
+#feed_contextmenu.open_contextmenu
+{
+    display: grid;
+}
+
+#feed_rearrange_guideline
+{
+    display: none;
+    position: fixed;
+    border: 1px solid var(--color_text_normal);
+    z-index: -1;
+}
+
+/* News ***********************************************************************/
+
+#news_toolbar
+{
+    grid-area: news_toolbar;
+}
+#news_toolbar #news_loading_spinner
+{
+    float: right;
+}
+
+#news
+{
+    grid-area: news;
+    position: relative;
+    min-height: 0;
+    overflow-x: clip;
+    overflow-y: auto;
+    line-height: 1.5em;
+    user-select: none;
+}
+#news .news
+{
+    display: grid;
+    grid-template:
+        "read_indicator icon published title" auto
+        /1.5em 1.5em max-content 1fr;
+    grid-column-gap: 0.5em;
+    cursor: pointer;
+}
+#news .news_selected
+{
+    background-color: var(--color_selection) !important;
+}
+#news .news .read_indicator
+{
+    grid-area: read_indicator;
+    justify-self: center;
+    align-self: center;
+}
+#news .news .icon
+{
+    grid-area: icon;
+    justify-self: center;
+    align-self: center;
+}
+#news .news .published
+{
+    grid-area: published;
+    align-self: center;
+}
+#news .news .title
+{
+    grid-area: title;
+    overflow-wrap: break-word;
+}
+#news .news .read_indicator
+{
+    opacity: 0%;
+}
+#news .news.unread .read_indicator
+{
+    opacity: 100%;
+}
+#news .news.unread .published,
+#news .news.unread .title
+{
+    font-weight: bold;
+}
+#news .news.recycled .published,
+#news .news.recycled .title
+{
+    text-decoration: line-through;
+}
+#news .news:nth-of-type(even)
+{
+    background-color: var(--color_transparency);
+}
+
+/* Newsreader *****************************************************************/
+
+#newsreader
+{
+    grid-area: newsreader;
+    position: relative;
+
+    display: grid;
+    grid-template:
+        "header feedname loading_spinner" auto
+        "enclosure enclosure enclosure" auto
+        "text text text" 1fr
+        /1fr max-content auto;
+
+    grid-row-gap: 8px;
+    grid-column-gap: 8px;
+
+    overflow-wrap: break-word;
+    min-height: 0;
+    overflow-y: auto;
+}
+
+#newsreader > h2
+{
+    margin: 0;
+    grid-area: header;
+}
+#newsreader #newsreader_feedname
+{
+    grid-area: feedname;
+    align-self: center;
+    justify-self: end;
+}
+#newsreader #newsreader_loading_spinner
+{
+    grid-area: loading_spinner;
+    align-self: center;
+}
+#newsreader #newsreader_enclosure
+{
+    grid-area: enclosure;
+}
+#newsreader #newsreader_news_text
+{
+    grid-area: text;
+}
+</style>
+</head>
+
+<body>
+{{header.make_header(site=site, request=request)}}
+<div id="content_body">
+    <div id="left" class="panel">
+        <div id="feed_toolbar">
+            <button onclick="return add_feed_form(event);">+Feed</button>
+            <button onclick="return add_folder_form(event);">+Folder</button>
+            <button onclick="return refresh_all_feeds_form(event);">Refresh all</button>
+            <span id="feeds_loading_spinner" class="hidden">⌛</span>
+        </div>
+
+        <hr/>
+
+        <div
+            id="feeds"
+            onclick="return feed_click(event);"
+            ondblclick="return feed_doubleclick(event);"
+            oncontextmenu="return feed_rightclick(event);"
+            ondragstart="return feed_drag_start(event);"
+            ondragend="return feed_drag_end(event);"
+            ondragover="return feed_drag_over(event);"
+            ondragenter="return feed_drag_enter(event);"
+            ondragleave="return feed_drag_leave(event);"
+            ondrop="return feed_drag_drop(event);"
+        >
+        <!-- To be populated by javascript -->
+        </div>
+    </div>
+
+    <div id="add_feed_dialog" class="contextmenu">
+        <b>Add a feed</b>
+        <hr/>
+        <label>URL:</label> <input type="text" id="add_feed_url_input" placeholder="URL" data-bind-enter-to-button="add_feed_submit_button"/>
+        <br/>
+        <label>Title:</label> <input type="text" id="add_feed_title_input" placeholder="Title (automatic)" data-bind-enter-to-button="add_feed_submit_button"/>
+        <br/>
+        <label><input type="checkbox" id="add_feed_isolate_input"/> Isolate GUIDs</label>
+        <br/>
+        <button id="add_feed_submit_button" class="button_with_spinner" data-spinner-text="⌛" onclick="return add_feed_submit(event);">Add</button>
+    </div>
+
+    <div id="add_folder_dialog" class="contextmenu">
+        <b>Add a folder</b>
+        <hr/>
+        <label>Title:</label> <input type="text" id="add_folder_title_input" data-bind-enter-to-button="add_folder_submit_button" placeholder="Title"/>
+        <br/>
+        <button id="add_folder_submit_button" class="button_with_spinner" data-spinner-text="⌛" onclick="return add_folder_submit(event);">Add</button>
+    </div>
+
+    <div id="feed_contextmenu" class="contextmenu">
+        <b id="context_feed_title"></b>
+        <button id="refresh_feed_button" onclick="return refresh_feed_form(event);">Refresh</button>
+        <select id="run_filter_select" onchange="return run_filter_form(event);">
+            <option value="">Run a filter</option>
+        </select>
+        <a id="context_feed_gotoweb">Web</a>
+        <a id="context_feed_settings">Settings</a>
+    </div>
+
+    <div id="feed_rearrange_guideline"></div>
+
+    <!-- Mousedown instead of click makes the UI feel faster, though I
+    realize it's not semantically the right choice -->
+    <div
+        id="right"
+        class="panel"
+        onmousedown="return news_click(event);"
+        ondblclick="return news_doubleclick(event);"
+    >
+        <div id="news_toolbar">
+            <button onclick="return mark_selected_read(event);">Mark read</button>
+            <button onclick="return mark_selected_unread(event);">Mark unread</button>
+            <button id="set_show_recycled_button" onclick="return set_show_recycled_form(event);">Show recycled</button>
+            <button id="set_show_read_button" onclick="return set_show_read_form(event);">Show read</button>
+            <button id="set_show_unread_button" onclick="return set_show_unread_form(event);">Show unread</button>
+            <span id="active_feed_title"></span>
+            <span id="news_loading_spinner" class="hidden">⌛</span>
+        </div>
+
+        <hr/>
+
+        <div id="news">
+        <!-- To be populated by javascript -->
+        </div>
+    </div>
+
+    <div id="newsreader" class="panel">
+        <h2><a id="newsreader_news_title" target="_blank"></a></h2>
+        <span id="newsreader_feedname"></span>
+        <span id="newsreader_loading_spinner" class="hidden">⌛</span>
+        <div id="newsreader_enclosure"></div>
+        <div id="newsreader_news_text"></div>
+    </div>
+</div>
+</body>
+
+<script type="text/javascript">
+AUTOMATIC_RELOAD_FEEDS_INTERVAL = 5 * 60 * 1000;
+
+const newsreader = document.getElementById("newsreader");
+const newsreader_news_title = document.getElementById("newsreader_news_title");
+const newsreader_feedname = document.getElementById("newsreader_feedname");
+const newsreader_enclosure = document.getElementById("newsreader_enclosure");
+const newsreader_news_text = document.getElementById("newsreader_news_text");
+
+const feed_rearrange_guideline = document.getElementById("feed_rearrange_guideline");
+
+let active_feed = null;
+
+// We store some news objects in memory to reduce API calls when switching back
+// and forth between news on the UI. This cache is not used as extensively as I
+// would like yet but I need to make sure I don't mess things up.
+const stored_news_objects = {};
+
+// When right-clicking on a feed, we store that div in this variable so that we
+// can act upon it after the user clicks an option in the contextmenu.
+let right_clicked_feed = null;
+
+// When shift-clicking to select ranges of news, we need to remember the news
+// that was clicked first.
+let first_selected_news = null;
+
+// If the user presses CTRL+A while the news divs are still loading, we will
+// create the new divs in the selected state, and turn the flag back off when
+// they are done loading.
+let wants_to_select_all = false;
+
+const feeds_loading_spinner = new spinners.Spinner(document.getElementById("feeds_loading_spinner"));
+const news_loading_spinner = new spinners.Spinner(document.getElementById("news_loading_spinner"));
+const newsreader_loading_spinner = new spinners.Spinner(document.getElementById("newsreader_loading_spinner"));
+
+let sse = null;
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// FEED LIST ///////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+let active_feed_id;
+
+function add_feed_form(event)
+{
+    const dialog = document.getElementById("add_feed_dialog");
+    contextmenus.show_menu(event, dialog);
+    document.getElementById("add_feed_url_input").focus();
+    event.stopPropagation();
+}
+
+function add_feed_submit(event)
+{
+    function callback(response)
+    {
+        spinners.close_button_spinner(document.getElementById("add_folder_submit_button"));
+        if (response.meta.status != 200 || ! response.meta.json_ok)
+        {
+            alert(JSON.stringify(response));
+            return;
+        }
+        const feed_id = response.data.id;
+        const settings_url = `/feed/${feed_id}/settings`;
+        window.location.href = settings_url;
+    }
+    const rss_url = document.getElementById("add_feed_url_input").value.trim();
+    if (! rss_url)
+    {
+        return spinners.BAIL;
+    }
+    const title = document.getElementById("add_feed_title_input").value.trim();
+    const isolate_guids = document.getElementById("add_feed_isolate_input").checked;
+    api.feeds.add_feed(rss_url, title, isolate_guids, callback);
+}
+
+function add_folder_form(event)
+{
+    const dialog = document.getElementById("add_folder_dialog");
+    contextmenus.show_menu(event, dialog);
+    document.getElementById("add_folder_title_input").focus();
+    event.stopPropagation();
+}
+
+function add_folder_submit(event)
+{
+    function callback(response)
+    {
+        spinners.close_button_spinner(button);
+        contextmenus.hide_open_menus();
+        if (response.meta.status != 200 || ! response.meta.json_ok)
+        {
+            alert(JSON.stringify(response));
+            return;
+        }
+        get_and_show_feeds();
+        if (input.value === title)
+        {
+            input.value = "";
+        }
+    }
+    const button = event.target;
+    const rss_url = "";
+    const input = document.getElementById("add_folder_title_input");
+    input.value = input.value.trim();
+    const title = input.value;
+    if (! title)
+    {
+        // Though it's not strictly needed by the API, it doesn't make much
+        // sense to make a folder with no name.
+        return spinners.BAIL;
+    }
+    const isolate_guids = false;
+    api.feeds.add_feed(rss_url, title, isolate_guids, callback);
+}
+
+function build_feed_contextmenu(feed, menu)
+{
+    document.getElementById("context_feed_title").innerText = feed.querySelector(".title").innerText;
+    if (feed.dataset.webUrl)
+    {
+        const gotoweb = document.getElementById("context_feed_gotoweb")
+        gotoweb.classList.remove("hidden");
+        gotoweb.href = feed.dataset.webUrl;
+    }
+    else
+    {
+        document.getElementById("context_feed_gotoweb").classList.add("hidden");
+    }
+
+    document.getElementById("run_filter_select").classList.remove("hidden");
+    const settings = document.getElementById("context_feed_settings");
+    settings.classList.remove("hidden");
+    settings.href = `/feed/${feed.dataset.id}/settings`;
+}
+
+function feed_click(event)
+{
+    const feed = event.target.closest(".feed");
+    if (! feed)
+    {
+        return false;
+    }
+    if (active_feed_id == feed.dataset.id && feed.classList.contains("active"))
+    {
+        return false;
+    }
+
+    const feeds = document.getElementById("feeds");
+    for (const other_feed of feeds.querySelectorAll(".feed"))
+    {
+        other_feed.classList.remove("active");
+    }
+    feed.classList.add("active");
+    active_feed_id = feed.dataset.id;
+    history.replaceState(null, "", `/feed/${feed.dataset.id}` + window.location.search);
+
+    const news = document.getElementById("news").scrollTop = 0;
+    get_and_show_active_newss();
+}
+
+function feed_doubleclick(event)
+{
+    const feed = event.target.closest(".feed");
+    if (! feed)
+    {
+        return false;
+    }
+    if (feed.classList.contains("collapsed"))
+    {
+        feed.classList.remove("collapsed");
+        localStorage.removeItem(`ui_collapse_feed_${feed.dataset.id}`);
+    }
+    else
+    {
+        if (feed.querySelector(".descendants").hasChildNodes())
+        {
+            feed.classList.add("collapsed");
+            localStorage.setItem(`ui_collapse_feed_${feed.dataset.id}`, true);
+        }
+    }
+}
+
+function feed_rightclick(event)
+{
+    if (event.ctrlKey || event.shiftKey || event.altKey)
+    {
+        return true;
+    }
+    const feed = event.target.closest(".feed");
+    if (! feed)
+    {
+        right_clicked_feed = null;
+        contextmenus.hide_open_menus();
+        return true;
+    }
+    if (contextmenus.menu_is_open())
+    {
+        contextmenus.hide_open_menus();
+    }
+    right_clicked_feed = feed;
+    const menu = document.getElementById("feed_contextmenu");
+    build_feed_contextmenu(feed, menu);
+    setTimeout(() => {contextmenus.show_menu(event, menu);}, 0);
+    event.stopPropagation();
+    event.preventDefault();
+    return false;
+}
+
+function feed_gotoweb_form(event)
+{
+    if (right_clicked_feed === null)
+    {
+        return;
+    }
+    if (! right_clicked_feed.dataset.webUrl)
+    {
+        return;
+    }
+    window.open(right_clicked_feed.dataset.webUrl, "_blank").focus();
+    contextmenus.hide_open_menus();
+}
+
+function figure_active_feed_id()
+{
+    /*
+    Parse the URL to determine what the active feed is. Of course we can pass it
+    in from the server via jinja, but then we have the initial pageload using
+    different behavior from subsequent feed clicks. It's nice to have everything
+    done the same way.
+    */
+    const match = window.location.href.match(/\/feed\/(\d+)/);
+    if (match === null)
+    {
+        active_feed_id = null;
+    }
+    else
+    {
+        active_feed_id = match[1];
+    }
+}
+
+// Although the SSE should keep us up to date on changes, it's nice to
+// periodically reload the feeds list just to be absolutely sure everything
+// is accurate. Since most requests will 304 this is quite cheap.
+let get_and_show_feeds_automatic_timeout = null;
+
+function get_and_show_feeds()
+{
+    function callback(response)
+    {
+        if (response.meta.status != 200 || ! response.meta.json_ok)
+        {
+            // alert(JSON.stringify(response));
+            return;
+        }
+        setTimeout(() => {show_feeds(response.data);}, 0);
+    }
+    clearTimeout(get_and_show_feeds_automatic_timeout);
+    feeds_loading_spinner.show(50);
+    api.feeds.get_feeds(callback);
+    get_and_show_feeds_automatic_timeout = setTimeout(get_and_show_feeds, AUTOMATIC_RELOAD_FEEDS_INTERVAL);
+}
+
+function get_feed_ancestors(feed, include_self)
+{
+    /*
+    Get a list of all feed divs starting from the given feed all the way up to
+    its root ancestor. This can be used for updating unread counts.
+    */
+    const result = [];
+    if (include_self)
+    {
+        result.push(feed);
+    }
+    feed = get_feed_parent(feed);
+    while (feed !== null)
+    {
+        result.push(feed);
+        feed = get_feed_parent(feed);
+    }
+    return result;
+}
+
+function get_feed_div(feed_id)
+{
+    return document.getElementById(`feed_${feed_id}`);
+}
+
+function get_feed_parent(feed)
+{
+    // Hop over the .descendants box.
+    const parent = feed.parentElement.parentElement;
+    if (parent.classList.contains("feed"))
+    {
+        return parent;
+    }
+    return null;
+}
+
+function make_feed_div(feed_object)
+{
+    const div = document.createElement("div");
+    div.id = `feed_${feed_object.id}`;
+    div.classList.add("feed");
+    if (localStorage.getItem(`ui_collapse_feed_${feed_object.id}`))
+    {
+        div.classList.add("collapsed");
+    }
+    if (feed_object.last_refresh_error)
+    {
+        div.classList.add("refresh_error");
+    }
+    div.dataset.id = feed_object.id;
+
+    if (active_feed_id == feed_object.id)
+    {
+        div.classList.add("active");
+    }
+    if (feed_object.rss_url)
+    {
+        div.dataset.rssUrl = feed_object.rss_url;
+    }
+    if (feed_object.web_url)
+    {
+        div.dataset.webUrl = feed_object.web_url;
+    }
+    div.dataset.uiOrderRank = feed_object.ui_order_rank;
+    div.draggable = true;
+
+    const icon = document.createElement("span");
+    icon.classList.add("icon");
+    const img = document.createElement("img");
+    img.src = `/feed/${feed_object.id}/icon.png`;
+    img.alt = "";
+    icon.appendChild(img);
+    div.appendChild(icon);
+
+    const title = document.createElement("span");
+    title.classList.add("title");
+    title.innerText = feed_object.display_name;
+    div.appendChild(title);
+
+    const refresh_spinner = document.createElement("span");
+    refresh_spinner.classList.add("refresh_spinner");
+    refresh_spinner.classList.add("hidden");
+    refresh_spinner.innerText = "⌛";
+    div.appendChild(refresh_spinner);
+
+    const unread_count = document.createElement("span");
+    unread_count.classList.add("unread_count");
+    if (feed_object.unread_count == 0)
+    {
+        unread_count.classList.add("hidden");
+    }
+    unread_count.innerText = feed_object.unread_count;
+    div.appendChild(unread_count);
+
+    const descendants = document.createElement("div");
+    descendants.classList.add("descendants");
+    div.appendChild(descendants);
+    return div;
+}
+
+function propagate_unread_delta(feed, delta)
+{
+    /*
+    Update the unread_count span of this feed and all its ancestors by adding
+    a positive or negative delta.
+    */
+    while (feed)
+    {
+        const unread_span = feed.getElementsByClassName("unread_count")[0];
+        // We should hopefully avoid situations that cause negative numbers,
+        // but may as well be safe.
+        const count = Math.max(0, parseInt(unread_span.textContent) + delta);
+        unread_span.textContent = count;
+        if (count == 0)
+        {
+            unread_span.classList.add("hidden");
+        }
+        else
+        {
+            unread_span.classList.remove("hidden");
+        }
+        feed = get_feed_parent(feed);
+    }
+}
+
+function refresh_all_feeds_form(event)
+{
+    function callback(response)
+    {
+        if (response.meta.status != 200 || ! response.meta.json_ok)
+        {
+            alert(JSON.stringify(response));
+            return;
+        }
+    }
+    return api.feeds.refresh_all(callback);
+}
+
+function refresh_feed_form(event)
+{
+    if (right_clicked_feed === null)
+    {
+        return;
+    }
+
+    function callback(response)
+    {
+        if (response.meta.status != 200 || ! response.meta.json_ok)
+        {
+            alert(JSON.stringify(response));
+            return;
+        }
+    }
+    contextmenus.hide_open_menus();
+    api.feeds.refresh(right_clicked_feed.dataset.id, callback);
+}
+
+function set_unread_count(feed_div, unread_count)
+{
+    unread_count = parseInt(unread_count);
+    const count_div = feed_div.getElementsByClassName("unread_count")[0];
+    count_div.innerText = unread_count;
+    if (unread_count == 0)
+    {
+        count_div.classList.add("hidden");
+    }
+    else
+    {
+        count_div.classList.remove("hidden");
+    }
+}
+
+function show_feeds(feed_objects)
+{
+    /*
+    Having received the feed objects from the server, make the divs and display
+    them on the left.
+    */
+    let total_unread_count = 0;
+    const feeds_list = document.getElementById("feeds");
+    common.delete_all_children(feeds_list);
+
+    for (const feed_object of feed_objects)
+    {
+        const div = make_feed_div(feed_object);
+        if (feed_object.parent_id)
+        {
+            const parent = get_feed_div(feed_object.parent_id);
+            parent.querySelector(".descendants").appendChild(div);
+        }
+        else
+        {
+            feeds_list.appendChild(div);
+            total_unread_count += feed_object.unread_count;
+        }
+    }
+    feeds_loading_spinner.hide();
+}
+
+// FEED DRAG AND DROP //////////////////////////////////////////////////////////////////////////////
+
+let dragging_feed = null;
+function feed_drag_start(event)
+{
+    const feed = event.target.closest(".feed");
+    if (! feed)
+    {
+        return false;
+    }
+    dragging_feed = feed;
+    const feeds = document.getElementById("feeds");
+    // Without this timeout, the DOM shift causes the drag event to cancel
+    // itself immediately.
+    setTimeout(() => {feeds.classList.add("dragging_active");}, 0);
+}
+
+function feed_drag_enter(event)
+{
+    const target = event.target.closest(".feed:not(#feed_all)");
+    if (! target)
+    {
+        return false;
+    }
+}
+
+function feed_drag_leave(event)
+{
+    const target = event.target.closest(".feed:not(#feed_all)");
+    if (! target)
+    {
+        return false;
+    }
+    feed_rearrange_guideline.style.display = "";
+}
+
+function feed_drag_end(event)
+{
+    dragging_feed = null;
+    const feeds = document.getElementById("feeds");
+    feeds.classList.remove("dragging_active");
+    feed_rearrange_guideline.style.display = "";
+}
+
+function feed_drag_above_below_ontop(event, target)
+{
+    const target_rect = target.getBoundingClientRect();
+    const cursor_y_percentage = (event.clientY - target_rect.y) / target.offsetHeight;
+    if (cursor_y_percentage < 0.33)
+    {
+        return "above";
+    }
+    else if (cursor_y_percentage < 0.66)
+    {
+        return "ontop";
+    }
+    else
+    {
+        return "below";
+    }
+}
+
+function feed_drag_over(event)
+{
+    const target = event.target.closest(".feed:not(#feed_all)");
+    if (! target)
+    {
+        return false;
+    }
+    if (target === dragging_feed)
+    {
+        return false;
+    }
+
+    event.preventDefault();
+
+    feed_rearrange_guideline.style.display = "block";
+
+    const drag_position = feed_drag_above_below_ontop(event, target);
+    const target_rect = target.getBoundingClientRect();
+
+    if (drag_position === "above")
+    {
+        feed_rearrange_guideline.style.width = target_rect.width + "px";
+        feed_rearrange_guideline.style.height = "0px";
+        feed_rearrange_guideline.style.left = target_rect.x + "px";
+        feed_rearrange_guideline.style.top = target_rect.y + "px";
+    }
+    else if (drag_position === "ontop")
+    {
+        feed_rearrange_guideline.style.width = target_rect.width + "px";
+        feed_rearrange_guideline.style.height = target_rect.height + "px";
+        feed_rearrange_guideline.style.left = target_rect.x + "px";
+        feed_rearrange_guideline.style.top = target_rect.y + "px";
+    }
+    else
+    {
+        feed_rearrange_guideline.style.width = target_rect.width + "px";
+        feed_rearrange_guideline.style.height = "0px";
+        feed_rearrange_guideline.style.left = target_rect.x + "px";
+        feed_rearrange_guideline.style.top = (target_rect.y + target_rect.height) + "px";
+    }
+}
+
+function feed_drag_drop(event)
+{
+    const dragged_feed = dragging_feed;
+    dragging_feed = null;
+    const target = event.target.closest(".feed:not(#feed_all)");
+    if (! target)
+    {
+        return false;
+    }
+    if (target.dataset.id == dragged_feed.dataset.id)
+    {
+        return false;
+    }
+    if (dragged_feed.contains(target))
+    {
+        return false;
+    }
+    const drop_position = feed_drag_above_below_ontop(event, target);
+    const last_descendant = target.querySelector(".descendants").lastElementChild;
+
+    let new_parent;
+    let ui_order_rank;
+
+    if (drop_position === "above")
+    {
+        new_parent = get_feed_parent(target);
+        ui_order_rank = parseFloat(target.dataset.uiOrderRank) - 0.5;
+    }
+    else if (drop_position === "ontop")
+    {
+        new_parent = target;
+        if (last_descendant)
+        {
+            ui_order_rank = parseFloat(last_descendant.dataset.uiOrderRank) + 1;
+        }
+        else
+        {
+            ui_order_rank = 1;
+        }
+    }
+    else
+    {
+        new_parent = get_feed_parent(target);
+        ui_order_rank = parseFloat(target.dataset.uiOrderRank) + 0.5;
+    }
+
+    if (new_parent !== null)
+    {
+        new_parent = new_parent.dataset.id;
+    }
+
+    function callback(response)
+    {
+        if (response.meta.status != 200 || ! response.meta.json_ok)
+        {
+            alert(JSON.stringify(response));
+            return;
+        }
+        get_and_show_feeds();
+    }
+    api.feeds.set_parent(dragged_feed.dataset.id, new_parent, ui_order_rank, callback);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// NEWS LIST ///////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+function center_news_in_list(news)
+{
+    /*
+    When navigating with the arrow keys, we like to center the news on the
+    screen so that you can continue to skim for titles above and below the
+    current one.
+    */
+    const news_list = document.getElementById("news");
+    const news_centerline = news.offsetTop + (news.offsetHeight / 2);
+    news_list.scrollTop = news_centerline - (news_list.offsetHeight / 2);
+}
+
+function figure_active_filter()
+{
+    /*
+    Parse the URL to figure out which viewing filter is being used (show read,
+    show recycled, show unread), and bolden the corresponding button. Of course
+    we can pass this in from the server via jinja, but that makes for ugly
+    conditions in the markup and all subsequent filter changes will be done
+    through javascript anyway, so it's nice to have it all done the same way.
+    */
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("recycled") === "true")
+    {
+        document.getElementById("set_show_recycled_button").classList.add("bold");
+    }
+    else if (params.get("read") === "null")
+    {
+        document.getElementById("set_show_read_button").classList.add("bold");
+    }
+    else
+    {
+        document.getElementById("set_show_unread_button").classList.add("bold");
+    }
+}
+
+function get_and_show_active_newss()
+{
+    if (active_feed_id === null)
+    {
+        return;
+    }
+    return get_and_show_newss(active_feed_id);
+}
+
+let showing_news_request = null;
+function get_and_show_newss(feed_id)
+{
+    if (feed_id === null)
+    {
+        return;
+    }
+    const url_params = new URLSearchParams(window.location.search);
+    let read = url_params.get("read");
+    if (read === null)
+    {
+        read = false;
+    }
+    let recycled = url_params.get("recycled");
+    if (recycled === null)
+    {
+        recycled = false;
+    }
+    function callback(response)
+    {
+        if (! response.meta.completed)
+        {
+            // The user probably clicked another feed and canceled this request.
+            return;
+        }
+        if (response.meta.status != 200 || ! response.meta.json_ok)
+        {
+            alert(JSON.stringify(response));
+            return;
+        }
+        console.log(`Showing the news for feed ${feed_id}.`);
+        show_newss(response.data);
+    }
+    if (showing_news_request)
+    {
+        // If you click on a small feed while the previous big one is still
+        // in transit, the bigger one will come in second and overwrite it.
+        showing_news_request.abort();
+    }
+    showing_news_request = api.news.get_newss(feed_id, read, recycled, callback);
+    news_loading_spinner.show(50);
+}
+
+function make_news_div(news_object)
+{
+    const div = document.createElement("div");
+    div.id = `news_${news_object.id}`;
+    div.dataset.id = news_object.id;
+    div.classList.add("news");
+    if (! news_object.read)
+    {
+        div.classList.add("unread");
+    }
+    if (news_object.recycled)
+    {
+        div.classList.add("recycled");
+    }
+    if (wants_to_select_all)
+    {
+        div.classList.add("news_selected");
+    }
+    div.dataset.feedId = news_object.feed_id;
+    div.dataset.webUrl = news_object.web_url;
+
+    div.dataset.enclosures = JSON.stringify(news_object.enclosures);
+
+    const read_indicator = document.createElement("span");
+    read_indicator.classList.add("read_indicator");
+    read_indicator.innerText = "🔥";
+    div.appendChild(read_indicator);
+
+    const icon = document.createElement("span");
+    icon.classList.add("icon");
+    const img = document.createElement("img");
+    img.src = `/feed/${news_object.feed_id}/icon.png`;
+    img.alt = "";
+    icon.appendChild(img);
+    div.appendChild(icon);
+
+    const published = document.createElement("span");
+    published.classList.add("published");
+    published.innerText = news_object.published_string_local;
+    div.appendChild(published);
+
+    const title = document.createElement("span");
+    title.classList.add("title");
+    title.innerText = news_object.title;
+    // title.innerText = news_object.id;
+    div.appendChild(title);
+
+    return div;
+}
+
+function mark_read_and_propagate_unread_delta(news)
+{
+    if (! news.classList.contains("unread"))
+    {
+        return;
+    }
+    news.classList.remove("unread");
+    if (news.classList.contains("recycled"))
+    {
+        // Recycled news do not count towards the unread_count returned by the
+        // server, so marking as read should not further decrease the count.
+        return;
+    }
+    const feed = get_feed_div(news.dataset.feedId);
+    setTimeout(() => {propagate_unread_delta(feed, -1);}, 0);
+}
+
+function mark_unread_and_propagate_unread_delta(news)
+{
+    if (news.classList.contains("unread"))
+    {
+        return;
+    }
+    news.classList.add("unread");
+    if (news.classList.contains("recycled"))
+    {
+        // Recycled news do not count towards the unread_count returned by the
+        // server, so marking as read should not further increase the count.
+        return;
+    }
+    const feed = get_feed_div(news.dataset.feedId);
+    setTimeout(() => {propagate_unread_delta(feed, +1);}, 0);
+}
+
+function news_click(event)
+{
+    if (event.button !== 0)
+    {
+        return true;
+    }
+    if (event.target.classList.contains("read_indicator"))
+    {
+        return news_unread_indicator_click(event);
+    }
+    const news = event.target.closest(".news");
+    if (! news)
+    {
+        return true;
+    }
+
+    if (first_selected_news === null)
+    {
+        first_selected_news = news;
+    }
+
+    if (event.shiftKey === false && event.ctrlKey === false)
+    {
+        if (! news.classList.contains("news_selected") || get_selected_news().length != 1)
+        {
+            select_one_news(news);
+        }
+    }
+    else if (event.shiftKey === false && event.ctrlKey === true)
+    {
+        select_ctrl_news(news);
+        return false;
+    }
+    else if (event.shiftKey === true && event.ctrlKey === false)
+    {
+        select_shift_news(news);
+        return false;
+    }
+
+    mark_read_and_propagate_unread_delta(news);
+
+    if (showing_news_id !== news.dataset.id)
+    {
+        setTimeout(() => {show_news_in_newsreader(news)}, 0);
+        // show_news_in_newsreader(news);
+    }
+}
+
+function news_doubleclick(event)
+{
+    if (event.target.classList.contains("read_indicator"))
+    {
+        return true;
+    }
+    const news = event.target.closest(".news");
+    if (! news)
+    {
+        return true;
+    }
+    window.open(news.dataset.webUrl, "_blank").focus();
+    event.preventDefault();
+    event.stopPropagation();
+}
+
+function news_unread_indicator_click(event)
+{
+    function callback(response)
+    {
+        if (response.meta.status != 200 || ! response.meta.json_ok)
+        {
+            alert(JSON.stringify(response));
+            return;
+        }
+    }
+    const news = event.target.closest(".news");
+    if (news.classList.contains("unread"))
+    {
+        api.news.set_read(news.dataset.id, true, callback);
+        mark_read_and_propagate_unread_delta(news);
+    }
+    else
+    {
+        api.news.set_read(news.dataset.id, false, callback);
+        mark_unread_and_propagate_unread_delta(news);
+    }
+    event.stopPropagation();
+}
+
+function set_show_read_form(event)
+{
+    let params = new URLSearchParams(window.location.search);
+    params.set("read", "null");
+    params.delete("recycled");
+    params = "?" + params.toString();
+    let url = window.location.pathname + params;
+    history.replaceState(null, "", url);
+    get_and_show_active_newss();
+    document.getElementById("set_show_read_button").classList.add("bold");
+    document.getElementById("set_show_unread_button").classList.remove("bold");
+    document.getElementById("set_show_recycled_button").classList.remove("bold");
+}
+
+function set_show_recycled_form(event)
+{
+    let params = new URLSearchParams(window.location.search);
+    params.set("read", "null");
+    params.set("recycled", "true");
+    params = "?" + params.toString();
+    let url = window.location.pathname + params;
+    history.replaceState(null, "", url);
+    get_and_show_active_newss();
+    document.getElementById("set_show_read_button").classList.remove("bold");
+    document.getElementById("set_show_unread_button").classList.remove("bold");
+    document.getElementById("set_show_recycled_button").classList.add("bold");
+}
+
+function set_show_unread_form(event)
+{
+    let params = new URLSearchParams(window.location.search);
+    params.delete("read");
+    params.delete("recycled");
+    params = params.toString();
+    if (params !== "")
+    {
+        params = "?" + params;
+    }
+    let url = window.location.pathname + params;
+    history.replaceState(null, "", url);
+    get_and_show_active_newss();
+    document.getElementById("set_show_read_button").classList.remove("bold");
+    document.getElementById("set_show_unread_button").classList.add("bold");
+    document.getElementById("set_show_recycled_button").classList.remove("bold");
+}
+
+let show_news_batch_timeout;
+function show_newss(newss)
+{
+    if (newss === undefined)
+    {
+        // This seems to happen when the XHR is cancelled.
+        return;
+    }
+    deselect_all_news();
+    window.cancelIdleCallback(show_news_batch_timeout);
+
+    const right = document.getElementById("right");
+    let news_list = document.getElementById("news");
+    right.removeChild(news_list);
+    news_list = document.createElement("div");
+    news_list.id = "news";
+    right.appendChild(news_list);
+
+    // const existing_news_divs = news_list.children;
+    const news_count = newss.length;
+    // const divs_count = existing_news_divs.length;
+    // const stop_index = Math.max(news_count, divs_count);
+    let index = 0;
+    let sleep_length = 0;
+    function show_batch()
+    {
+        const fragment = new DocumentFragment();
+        let this_batch = 300;
+        // while (index < stop_index && this_batch > 0)
+        while (index < news_count && this_batch > 0)
+        {
+            fragment.appendChild(make_news_div(newss[index]));
+            index += 1;
+            this_batch -= 1;
+        }
+        news_list.appendChild(fragment);
+        if (index >= news_count)
+        {
+            // console.log(`hiding the spinner at ${index} of ${news_count}`);
+            news_loading_spinner.hide();
+            wants_to_select_all = false;
+        }
+        else
+        {
+            show_news_batch_timeout = window.requestIdleCallback(show_batch, {timeout:sleep_length});
+            sleep_length += 50;
+        }
+    }
+    show_batch();
+}
+
+// NEWS SELECTION //////////////////////////////////////////////////////////////////////////////////
+
+function get_selected_news()
+{
+    return document.getElementById("news").querySelectorAll(".news_selected:not(.hidden)");
+}
+
+function deselect_all_news()
+{
+    for (const news of document.querySelectorAll(".news_selected"))
+    {
+        news.classList.remove("news_selected");
+    }
+    wants_to_select_all = false;
+    unshow_newsreader();
+}
+
+function mark_selected_read_unread(read)
+{
+    function callback(response)
+    {
+        if (response.meta.status != 200 || ! response.meta.json_ok)
+        {
+            alert(JSON.stringify(response));
+            return;
+        }
+        for (const id of response.data)
+        {
+            const news = document.getElementById(`news_${id}`);
+            if (read)
+            {
+                news.classList.remove("unread");
+            }
+            else
+            {
+                news.classList.add("unread");
+            }
+        }
+        get_and_show_feeds();
+    }
+    const news_ids = [];
+    for (const news of get_selected_news())
+    {
+        news_ids.push(news.dataset.id);
+    }
+    if (news_ids.length == 0)
+    {
+        return;
+    }
+    api.news.batch_set_read(news_ids, read, callback);
+}
+
+function mark_selected_read(event)
+{
+    return mark_selected_read_unread(true);
+}
+
+function mark_selected_unread(event)
+{
+    return mark_selected_read_unread(false);
+}
+
+function recycle_selected_news(event)
+{
+    function callback_one(response)
+    {
+        ;
+    }
+    function callback_batch(response)
+    {
+        get_and_show_feeds();
+    }
+    let selected = get_selected_news();
+    if (selected.length === 0)
+    {
+        return;
+    }
+    if (selected.length === 1)
+    {
+        selected = selected[0];
+        if (selected.classList.contains("recycled"))
+        {
+            return;
+        }
+        selected.classList.add("recycled");
+        api.news.set_recycled(selected.dataset.id, true, callback_one);
+        if (selected.classList.contains("unread"))
+        {
+            const feed = get_feed_div(selected.dataset.feedId);
+            setTimeout(() => {propagate_unread_delta(feed, -1);}, 0);
+        }
+        return;
+    }
+    const news_ids = [];
+    for (const news of selected)
+    {
+        news_ids.push(news.dataset.id);
+        news.classList.add("recycled");
+    }
+    api.news.batch_set_recycled(news_ids, true, callback_batch);
+}
+
+function unrecycle_selected_news(event)
+{
+    function callback(response)
+    {
+        if (response.meta.status != 200 || ! response.meta.json_ok)
+        {
+            alert(JSON.stringify(response));
+            return;
+        }
+        get_and_show_feeds();
+    }
+    const news_ids = [];
+    for (const news of get_selected_news())
+    {
+        news_ids.push(news.dataset.id);
+        news.classList.remove("recycled");
+    }
+    if (news_ids.length === 0)
+    {
+        return;
+    }
+    api.news.batch_set_recycled(news_ids, false, callback);
+}
+
+function select_all_news()
+{
+    first_selected_news = null;
+    for (const news of document.querySelectorAll(".news:not(.hidden)"))
+    {
+        news.classList.add("news_selected");
+    }
+    if (! document.getElementById("news_loading_spinner").classList.contains("hidden"))
+    {
+        wants_to_select_all = true;
+    }
+}
+
+function select_ctrl_news(news)
+{
+    // With the ctrl key, this might not literally be the first selected, but it
+    // will allow you to perform a shift-range based off whichever news you
+    // ctrl-clicked last, which is a nice feature.
+    first_selected_news = news;
+    if (news.classList.contains("news_selected"))
+    {
+        news.classList.remove("news_selected");
+    }
+    else
+    {
+        news.classList.add("news_selected");
+    }
+}
+
+function select_one_news(news)
+{
+    deselect_all_news();
+    news.classList.add("news_selected");
+    first_selected_news = news;
+}
+
+function select_shift_news(news)
+{
+    const newss = Array.from(document.querySelectorAll(".news:not(.hidden)"));
+
+    let start_index = newss.indexOf(first_selected_news);
+    let end_index = newss.indexOf(news);
+    if (end_index < start_index)
+    {
+        [start_index, end_index] = [end_index, start_index];
+    }
+
+    for (let index = start_index; index <= end_index; index += 1)
+    {
+        newss[index].classList.add("news_selected");
+    }
+}
+
+// When switching news items very quickly, especially by pressing up or
+// down, weird things can happen. Firstly, the requests become queued so
+// when you stop at your final news item, it takes forever to arrive. Secondly,
+// the news texts would appear in the reader one by one as they arrive.
+// We can delay the request so that if you flip through the news items very
+// quickly you won't pile up a bunch of requests.
+let show_news_after_timeout = null;
+function _up_down(sibling_func)
+{
+    let selected = get_selected_news();
+    if (selected.length !== 1)
+    {
+        return false;
+    }
+    selected = selected[0];
+    const neighbor = selected[sibling_func];
+    if (! neighbor)
+    {
+        return false;
+    }
+    if (neighbor.classList.contains("hidden"))
+    {
+        return false;
+    }
+    center_news_in_list(neighbor);
+    selected.classList.remove("news_selected");
+    neighbor.classList.add("news_selected");
+    first_selected_news = neighbor;
+
+    mark_read_with_batching(neighbor.dataset.id);
+    // console.log(`updown ${neighbor.dataset.id}`);
+    clearTimeout(show_news_after_timeout);
+    show_news_after_timeout = setTimeout(() => {show_news_in_newsreader(neighbor);}, 100);
+    mark_read_and_propagate_unread_delta(neighbor);
+}
+
+function up_hotkey(event)
+{
+    return _up_down("previousElementSibling");
+}
+
+function down_hotkey(event)
+{
+    return _up_down("nextElementSibling");
+}
+
+function visit_selected_news(event)
+{
+    let selected = get_selected_news();
+    if (selected.length !== 1)
+    {
+        return false;
+    }
+    selected = selected[0];
+    window.open(selected.dataset.webUrl, "_blank").focus();
+    event.stopPropagation();
+}
+
+// NEWS INTERNALS //////////////////////////////////////////////////////////////////////////////////
+
+const mark_read_queue = new Set();
+let mark_read_with_batching_timeout = null;
+function mark_read_submit_batch()
+{
+    function callback(response)
+    {
+        if (response.meta.status != 200 || ! response.meta.json_ok)
+        {
+            alert(JSON.stringify(response));
+            return;
+        }
+        for (const id of response.data)
+        {
+            const news = document.getElementById(`news_${id}`);
+            news.classList.remove("unread");
+        }
+    }
+    if (mark_read_queue.size === 0)
+    {
+        return;
+    }
+    api.news.batch_set_read(Array.from(mark_read_queue), true, callback);
+    mark_read_queue.clear();
+}
+
+function mark_read_with_batching(news_id)
+{
+    console.log(`Adding ${news_id} to the read batch queue.`);
+    clearTimeout(mark_read_with_batching_timeout);
+    mark_read_queue.add(news_id);
+    mark_read_with_batching_timeout = setTimeout(mark_read_submit_batch, 1000);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// NEWSREADER //////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+function fix_newsreader_links_blank()
+{
+    const links = newsreader_news_text.getElementsByTagName("a");
+    for (const link of links)
+    {
+        link.target = "_blank";
+    }
+}
+
+function fix_newsreader_relative_links()
+{
+    if (! showing_news_id)
+    {
+        return;
+    }
+    const base_url = newsreader_news_title.href;
+    function fixer(tagname, attribute)
+    {
+        for (const element of newsreader_news_text.getElementsByTagName(tagname))
+        {
+            const relative_url = element.getAttribute(attribute);
+            if (! relative_url)
+            {
+                continue;
+            }
+            element[attribute] = new URL(relative_url, base_url).href;
+        }
+    }
+    fixer("a", "href");
+    fixer("img", "src");
+    fixer("video", "src");
+    fixer("audio", "src");
+    fixer("source", "src");
+}
+
+function set_newsreader_news_text(html)
+{
+    newsreader_loading_spinner.hide();
+    if (html)
+    {
+        newsreader_news_text.innerHTML = DOMPurify.sanitize(html);
+        fix_newsreader_relative_links();
+        fix_newsreader_links_blank();
+        return;
+    }
+    const url = newsreader_news_title.href;
+    const youtube_match = url.match(/watch\?v=([A-Za-z0-9\-\_]{11})/) || url.match(/youtu\.be\/([A-Za-z0-9\-\_]{11})/);
+    if (youtube_match)
+    {
+        const youtube_id = youtube_match[1];
+        newsreader_news_text.innerHTML = `
+        <div class="video_iframe_holder">
+        <iframe width="711" height="400" frameborder="0" allow="encrypted-media" allowfullscreen
+        src="https://www.youtube.com/embed/${youtube_id}"></iframe>
+        </div>
+        `;
+    }
+}
+
+let showing_news_id = null;
+function show_news_in_newsreader(news)
+{
+    function shared_callback(news_object)
+    {
+        if (news_object.id != showing_news_id)
+        {
+            // The user must have clickedon something else in the meantime.
+            return;
+        }
+        clearTimeout(show_news_after_timeout);
+        set_newsreader_news_text(news_object.text);
+    }
+    function get_callback(response)
+    {
+        if (response.meta.status != 200 || ! response.meta.json_ok)
+        {
+            alert(JSON.stringify(response));
+            return;
+        }
+        stored_news_objects[response.data.id] = response.data;
+        shared_callback(response.data);
+    }
+
+    showing_news_id = news.dataset.id;
+    clearTimeout(show_news_after_timeout);
+    newsreader_loading_spinner.show();
+
+    // TITLE
+    newsreader_news_title.textContent = news.querySelector(".title").innerText;
+    newsreader_news_title.href = news.dataset.webUrl;
+    newsreader_feedname.innerText = get_feed_div(news.dataset.feedId).querySelector(".title").innerText;
+
+    // BODY
+    newsreader_news_text.innerHTML = "";
+    if (news.dataset.id in stored_news_objects)
+    {
+        if (news.classList.contains("unread"))
+        {
+            // When flipping back and forth between news items, it only needs to
+            // be marked read the first time.
+            mark_read_with_batching(news.dataset.id);
+        }
+        setTimeout(() => {shared_callback(stored_news_objects[news.dataset.id]);}, 0);
+    }
+    else
+    {
+        mark_read_queue.delete(news.dataset.id);
+        api.news.get_and_set_read(news.dataset.id, get_callback);
+    }
+
+    // ENCLOSURE
+    const enclosures = JSON.parse(news.dataset.enclosures);
+    for (const enclosure of enclosures)
+    {
+        if (enclosure.type && enclosure.type.match(/^audio\//))
+        {
+            const audio = document.createElement("audio");
+            audio.controls = true;
+            audio.src = enclosure.url;
+            newsreader_enclosure.appendChild(audio);
+        }
+        else
+        {
+            const link = document.createElement("a");
+            link.href = enclosure.url;
+            link.innerText = enclosure.url;
+            newsreader_enclosure.appendChild(link);
+        }
+    }
+}
+
+function unshow_newsreader()
+{
+    showing_news_id = null;
+    clearTimeout(show_news_after_timeout);
+
+    newsreader_news_title.innerText = "";
+    newsreader_feedname.innerText = "";
+
+    newsreader_news_text.innerHTML = "";
+
+    common.delete_all_children(newsreader_enclosure);
+
+    newsreader_loading_spinner.hide();
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// FILTERS /////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+function get_filters()
+{
+    function callback(response)
+    {
+        if (response.meta.status !== 200 || ! response.meta.json_ok)
+        {
+            alert(JSON.stringify(response));
+            return;
+        }
+
+        const select = document.getElementById("run_filter_select");
+        const first = select.firstElementChild;
+        common.delete_all_children(select);
+        select.appendChild(first);
+        for (const filter of response.data)
+        {
+            const option = document.createElement("option");
+            option.value = filter.id;
+            option.innerText = filter.display_name;
+            select.appendChild(option);
+        }
+    }
+    api.filters.get_filters(callback);
+}
+
+function run_filter_form(event)
+{
+    function callback(response)
+    {
+        select.disabled = false;
+        if (response.meta.status != 200 || ! response.meta.json_ok)
+        {
+            alert(JSON.stringify(response));
+            return;
+        }
+        const first = select.firstElementChild;
+        for (const child of select.children)
+        {
+            child.selected = false;
+        }
+        first.selected = true;
+        if (response.meta.status !== 200 || ! response.meta.json_ok)
+        {
+            alert(JSON.stringify(response));
+            return;
+        }
+        get_and_show_feeds();
+    }
+    const select = event.target;
+    if (select.value === "")
+    {
+        return;
+    }
+    select.disabled = true;
+    const filter_id = select.value;
+    api.filters.run_filter_now(filter_id, right_clicked_feed.dataset.id, callback);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// INTERNALS ///////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+function sse_feed_refresh_started(event)
+{
+    // Let's wait until the refresh is done, with a 30s backup just so we don't
+    // blow the timer forever if there's a problem.
+    clearTimeout(get_and_show_feeds_automatic_timeout);
+    get_and_show_feeds_automatic_timeout = setTimeout(get_and_show_feeds, 30000);
+    const feed_object = JSON.parse(event.data);
+    const feed = get_feed_div(feed_object.id);
+    if (! feed)
+    {
+        // Technically possible though unlikely. When the finished event comes
+        // in we'll reload the whole list anyway so don't worry  about it.
+        return;
+    }
+    for (const ancestor of get_feed_ancestors(feed, true))
+    {
+        // If an element is under a display:none block at any depth,
+        // offsetParent is null. If this feed folder is collapsed, we won't be
+        // able to see the spinner next to the feed, so let's find the closest
+        // parent that is not collapsed.
+        if (ancestor.offsetParent !== null)
+        {
+            ancestor.querySelector(".refresh_spinner").classList.remove("hidden");
+            break;
+        }
+    }
+}
+
+function sse_feed_refresh_finished(event)
+{
+    // There's a good chance that there will be more feeds refreshing within
+    // the next few seconds, or we'll get the queue_finished signal. Instead of
+    // hitting get_and_show_feeds after every refresh, let's wait a few seconds
+    // to see  if that signal comes in.
+    clearTimeout(get_and_show_feeds_automatic_timeout);
+    get_and_show_feeds_automatic_timeout = setTimeout(get_and_show_feeds, 10000);
+    const feed_object = JSON.parse(event.data);
+    const feed = get_feed_div(feed_object.id);
+    if (! feed)
+    {
+        return;
+    }
+    set_unread_count(feed, feed_object.unread_count);
+    for (const ancestor of get_feed_ancestors(feed, true))
+    {
+        // If the user re-expanded the feed folder while the spinner was shown,
+        // it would not be sufficient to remove the spinner from only the
+        // refreshed feed. We gotta go back and take it off the parents as well.
+        // Could be optimized with more state but not worried yet.
+        ancestor.querySelector(".refresh_spinner").classList.add("hidden");
+    }
+}
+
+function sse_feed_refresh_queue_finished(event)
+{
+    get_and_show_feeds();
+}
+
+function sse_filters_changed(event)
+{
+    get_filters();
+}
+
+let sse_watchdog_timeout;
+function sse_watchdog(event)
+{
+    console.log("keepalive");
+    clearTimeout(sse_watchdog_timeout);
+    sse_watchdog_timeout = setTimeout(sse_watchdog_expired, 120000);
+}
+
+function sse_watchdog_expired()
+{
+    console.log("SSE watchdog expired.");
+    start_sse();
+}
+
+function start_sse()
+{
+    if (sse !== null)
+    {
+        sse.close();
+    }
+    console.log("Starting SSE");
+    sse = new EventSource("/sse");
+    sse.addEventListener("feed_refresh_started", sse_feed_refresh_started);
+    sse.addEventListener("feed_refresh_finished", sse_feed_refresh_finished);
+    sse.addEventListener("feed_refresh_queue_finished", sse_feed_refresh_queue_finished);
+    sse.addEventListener("filters_changed", sse_filters_changed);
+    sse.addEventListener("keepalive", sse_watchdog);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+function on_pageload()
+{
+    figure_active_feed_id();
+    figure_active_filter();
+
+    setTimeout(get_and_show_feeds, 0);
+    if (active_feed_id !== null)
+    {
+        // Let the feeds load in first.
+        setTimeout(get_and_show_active_newss, 200);
+    }
+    setTimeout(get_filters, 0);
+    hotkeys.register_hotkey("ctrl a", select_all_news, "Select all news.");
+    hotkeys.register_hotkey("ctrl d", deselect_all_news, "Deselect all news.");
+    hotkeys.register_hotkey("arrowup", up_hotkey, "Move to previous news.");
+    hotkeys.register_hotkey("arrowdown", down_hotkey, "Move to next news.");
+    hotkeys.register_hotkey("enter", visit_selected_news, "Open selected news's web url.");
+    hotkeys.register_hotkey("delete", recycle_selected_news, "Recycle selected news.");
+    hotkeys.register_hotkey("shift + delete", unrecycle_selected_news, "Un-recycle selected news.");
+    hotkeys.register_help("Double-click feeds to collapse / expand folders.");
+    hotkeys.register_help("Right-click feeds to access their options. Hold ctrl, shift, or alt while right-clicking to skip custom context menu and get your native menu.");
+    start_sse();
+}
+document.addEventListener("DOMContentLoaded", on_pageload);
+</script>
+</html>

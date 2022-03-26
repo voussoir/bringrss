@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>About BringRSS</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <link rel="icon" href="/favicon.png" type="image/png"/>
+    <link rel="stylesheet" href="/static/css/common.css"/>
+    <link rel="stylesheet" href="/static/css/bringrss.css"/>
+    {% if theme %}<link rel="stylesheet" href="/static/css/theme_{{theme}}.css">{% endif %}
+    <script src="/static/js/common.js"></script>
+
+<style>
+#content_body
+{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+#content_body > .link_group,
+#content_body > .nice_link
+{
+    width: 90%;
+    max-width: 600px;
+}
+.link_group
+{
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 1fr;
+    grid-gap: 8px;
+}
+.nice_link
+{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin: 8px 0;
+    height: 40px;
+    background-color: var(--color_transparency);
+}
+.nice_link:hover
+{
+    background-color: var(--color_secondary);
+}
+</style>
+</head>
+
+
+<body>
+<div id="content_body">
+    <a class="nice_link" href="/">Home</a>
+    <div class="link_group">
+        <a class="nice_link" href="https://github.com/voussoir/bringrss">GitHub</a>
+        <a class="nice_link" href="https://gitlab.com/voussoir/bringrss">GitLab</a>
+        <a class="nice_link" href="https://codeberg.org/voussoir/bringrss">Codeberg</a>
+    </div>
+    <div class="link_group">
+        <a class="nice_link" href="?theme=turquoise">Turquoise</a>
+        <a class="nice_link" href="?theme=pearl">Pearl</a>
+        <a class="nice_link" href="?theme=slate">Slate</a>
+        <a class="nice_link" href="?theme=onyx">Onyx</a>
+    </div>
+    <a class="nice_link donate" href="https://voussoir.net/donate">voussoir.net/donate</a>
+</div>
+</body>
+
+
+<script type="text/javascript">
+</script>
+</html>

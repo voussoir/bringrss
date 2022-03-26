@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html>
+<head>
+    {% import "header.html" as header %}
+    <title>Filters</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <link rel="icon" href="/favicon.png" type="image/png"/>
+    <link rel="stylesheet" href="/static/css/common.css">
+    <link rel="stylesheet" href="/static/css/bringrss.css"/>
+    {% if theme %}<link rel="stylesheet" href="/static/css/theme_{{theme}}.css">{% endif %}
+    <script src="/static/js/common.js"></script>
+    <script src="/static/js/api.js"></script>
+    <script src="/static/js/spinners.js"></script>
+
+<style>
+h2:first-child
+{
+    margin-top: 0;
+}
+
+@media screen and (min-width: 800px)
+{
+    #content_body
+    {
+        display: grid;
+        grid-template:
+            "left right"
+            /1fr 450px;
+        min-height: 0;
+    }
+}
+@media screen and (max-width: 800px)
+{
+    #content_body
+    {
+        display: grid;
+        grid-template:
+            "left" auto
+            "right" auto
+            /1fr;
+    }
+}
+
+#left,
+#right
+{
+    min-height: 0;
+    overflow-y: auto;
+}
+#left
+{
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.filter textarea
+{
+    min-width: 300px;
+    width: 45%;
+    height: 75px;
+}
+.filter .error_message
+{
+    color: red;
+    font-weight: bold;
+}
+
+#right
+{
+    min-height: 0;
+    overflow-y: auto;
+}
+#right pre
+{
+    width: 100%;
+    border: 1px solid var(--color_text_normal);
+    border-radius: 4px;
+    padding: 4px;
+    overflow-x: auto;
+}
+</style>
+</head>
+
+<body>
+{{header.make_header(site=site, request=request)}}
+<div id="content_body">
+    <div id="left">
+        {% for filt in filters %}
+        <div id="filter_{{filt.id}}" data-id="{{filt.id}}" class="filter panel">
+            <h2 class="name_header">{{filt.display_name}}</h2>
+            <input type="text" class="set_name_input" placeholder="Name" value="{{filt.name or ''}}" data-bind-enter-to-button="{{filt.id}}_update_button" spellcheck="false"/>
+
+            <br/>
+
+            <textarea class="set_conditions_input" data-bind-ctrl-enter-to-button="{{filt.id}}_update_button" placeholder="Conditions" spellcheck="false">{{filt._conditions}}</textarea>
+
+            <textarea class="set_actions_input" data-bind-ctrl-enter-to-button="{{filt.id}}_update_button" placeholder="Actions" spellcheck="false">{{filt._actions}}</textarea>
+
+            <br/>
+
+            <button id="{{filt.id}}_update_button" class="set_actions_button button_with_spinner" data-spinner-text="⌛" onclick="return update_filter_form(event);">Update</button>
+
+            <br/>
+
+            <button
+            class="red_button button_with_confirm"
+            data-prompt="Delete filter?"
+            data-onclick="return delete_filter_form(event);"
+            >Delete filter</button>
+
+            <p class="error_message hidden"></p>
+        </div>
+        {% endfor %}
+
+        {% if not specific_filter %}
+        <div id="filter_new" class="filter panel">
+            <h2 class="name_header">New filter</h2>
+            <input id="add_filter_name_input" type="text" class="set_name_input" placeholder="Name" data-bind-enter-to-button="add_filter_button" spellcheck="false"/>
+
+            <br/>
+
+            <textarea id="add_filter_conditions_input" class="set_conditions_input" data-bind-ctrl-enter-to-button="add_filter_button" placeholder="Conditions" spellcheck="false"></textarea>
+
+            <textarea id="add_filter_actions_input" class="set_actions_input" data-bind-ctrl-enter-to-button="add_filter_button" placeholder="Actions" spellcheck="false"></textarea>
+
+            <br/>
+
+            <button id="add_filter_button" class="button_with_spinner" data-spinner-text="⌛" onclick="return add_filter_form(event);">Add filter</button>
+
+            <p class="error_message hidden"></p>
+        </div>
+        {% endif %}
+    </div>
+
+    <div id="right" class="panel">
+        <h1>Filters</h1>
+        <p>Every filter has a condition expression and a list of actions. The actions will take place if the entire condition expression evaluates to True.</p>
+
+        <p>When a news item arrives in the database, the filters that belong to its feed will run in order of priority. Then, any filters from the parent feed will run. If the news gets moved to a different feed, the filters belonging to that feed will run, and so forth until all of the filters finish running or the action <code>then_stop_filters</code> is used.</p>
+
+        <p>Some conditions and actions accept an argument. Use a colon <code>:</code> to separate the command name from the argument.</p>
+
+        <h2>Conditions</h2>
+        <p>Combine the following functions to create a boolean expression. You can use logical operators AND, OR, NOT, XOR, as well as grouping parentheses to create complex expressions.</p>
+        <b>Conditions with no arguments:</b>
+        <ul>
+            {% for name in filter_class._function_list('condition', 0) %}
+            <li><code>{{name}}</code></li>
+            {% endfor %}
+        </ul>
+
+        <b>Conditions with 1 argument:</b>
+        <ul>
+            {% for name in filter_class._function_list('condition', 1) %}
+            <li><code>{{name}}</code></li>
+            {% endfor %}
+        </ul>
+
+        <p>Note: If your argument contains spaces or parentheses, place quotation marks around the entire condition:argument so the parser doesn't them get confused with grouping. E.g. <code>"title_regex:free stuff"</code>, <code>"title_regex:(gog)"</code></p>
+
+        <p>Note: When using regular expressions, you'll have to double up your backslashes. One backslash escapes the expression parser, and the other backslash goes to your regular expression. E.g. <code>\\d</code>, <code>example\\.com</code>. Sorry for the inconvenience.</p>
+
+        <h2>Actions</h2>
+        <p>Each line of this field represents a single action. If the condition evaluates to True, then all of your actions will execute in order. You can not choose to execute only some of the actions &mdash; for that, create a separate filter.</p>
+        <p>You must place either <code>then_continue_filters</code> or <code>then_stop_filters</code> as the final action, and these must not appear anywhere except the final position.</p>
+
+        <b>Actions with no arguments:</b>
+        <ul>
+            {% for name in filter_class._function_list('action', 0) %}
+            <li><code>{{name}}</code></li>
+            {% endfor %}
+        </ul>
+
+        <b>Actions with 1 argument:</b>
+        <ul>
+            {% for name in filter_class._function_list('action', 1) %}
+            <li><code>{{name}}</code></li>
+            {% endfor %}
+        </ul>
+
+        <p>The <code>send_to_py</code> action allows you to run your own Python file with a news object. Your python file must define a function called <code>main</code> that only takes one argument, the news object, and returns the integer 0 if everything goes okay. If your function does not return 0, the action will fail. See <code>bringrss/objects.py</code> to see the News class.</p>
+
+        <h2>Examples</h2>
+
+        <pre>
+        Conditions:
+        always
+
+        Actions:
+        set_read:yes
+        then_stop_filters
+        </pre>
+
+        <pre>
+        Conditions:
+        enclosure_regex:\\.mp3$ AND NOT (is_read OR is_recycled)
+
+        Actions:
+        send_to_py:D:\bringrss\myscripts\download_podcast.py
+        set_read:yes
+        then_continue_filters
+        </pre>
+
+        <pre>
+        Conditions:
+        anywhere_regex:politics
+
+        Actions:
+        set_recycled:yes
+        then_stop_filters
+        </pre>
+
+        <pre>
+        Conditions:
+        (anywhere_regex:github\\.com/voussoir OR anywhere_regex:voussoir\\.net)
+        AND NOT (is_read OR is_recycled)
+
+        Actions:
+        move_to_feed:0123456789
+        send_to_py:D:\bringrss\myscripts\username_mention.py
+        then_continue_filters
+        </pre>
+    </div>
+</div>
+</body>
+
+<script type="text/javascript">
+{% if specific_filter %}
+const SPECIFIC_FILTER = {{specific_filter}};
+{% else %}
+const SPECIFIC_FILTER = null;
+{% endif %}
+
+function add_filter_form(event)
+{
+    function callback(response)
+    {
+        spinners.close_button_spinner(button);
+        if (! response.meta.json_ok)
+        {
+            alert(JSON.stringify(response));
+            return;
+        }
+        if (response.data.type === "error")
+        {
+            show_error_message(filter, `${response.data.error_type}: ${response.data.error_message}`);
+            return;
+        }
+        if (response.meta.status != 200)
+        {
+            alert(JSON.stringify(response));
+            return;
+        }
+        common.refresh();
+    }
+    const button = event.target;
+    const filter = button.closest(".filter");
+    clear_error_message(filter);
+
+    const name = document.getElementById("add_filter_name_input").value.trim();
+    const conditions = document.getElementById("add_filter_conditions_input").value.trim();
+    const actions = document.getElementById("add_filter_actions_input").value.trim();
+
+    if ((! conditions) || (! actions))
+    {
+        return spinners.BAIL;
+    }
+
+    api.filters.add_filter(name, conditions, actions, callback);
+}
+
+function clear_error_message(filter)
+{
+    const p = filter.getElementsByClassName("error_message")[0];
+    p.innerText = "";
+    p.classList.add("hidden");
+}
+
+function delete_filter_form(event)
+{
+    function callback(response)
+    {
+        if (! response.meta.json_ok)
+        {
+            alert(JSON.stringify(response));
+            return;
+        }
+        if (response.data.type === "error")
+        {
+            show_error_message(filter, `${response.data.error_type}: ${response.data.error_message}`);
+            return;
+        }
+        if (response.meta.status != 200)
+        {
+            alert(JSON.stringify(response));
+            return;
+        }
+        if (SPECIFIC_FILTER)
+        {
+            window.location.href = "/filters";
+        }
+        else
+        {
+            filter.parentElement.removeChild(filter);
+        }
+    }
+    const button = event.target;
+    const filter = button.closest(".filter");
+    clear_error_message(filter);
+
+    const filter_id = filter.dataset.id;
+    api.filters.delete_filter(filter_id, callback);
+}
+
+function show_error_message(filter, message)
+{
+    const p = filter.getElementsByClassName("error_message")[0];
+    p.innerText = message;
+    p.classList.remove("hidden");
+}
+
+function update_filter_form(event)
+{
+    function callback(response)
+    {
+        spinners.close_button_spinner(button);
+        if (! response.meta.json_ok)
+        {
+            alert(JSON.stringify(response));
+            return;
+        }
+        if (response.data.type === "error")
+        {
+            show_error_message(filter, `${response.data.error_type}: ${response.data.error_message}`);
+            return;
+        }
+        if (response.meta.status != 200)
+        {
+            alert(JSON.stringify(response));
+            return;
+        }
+
+        // Don't overwrite the box if the user has since changed their mind and
+        // typed something else.
+        if (name_input.value === name)
+        {
+            name_input.value = response.data.name;
+        }
+        if (conditions_input.value === conditions)
+        {
+            conditions_input.value = response.data.conditions;
+        }
+        if (actions_input.value === actions)
+        {
+            actions_input.value = response.data.actions;
+        }
+    }
+    const button = event.target;
+    const filter = button.closest(".filter");
+    clear_error_message(filter);
+
+    const name_input = filter.querySelector(".set_name_input");
+    const conditions_input = filter.querySelector(".set_conditions_input");
+    const actions_input = filter.querySelector(".set_actions_input");
+
+    name_input.value = name_input.value.trim();
+    conditions_input.value = conditions_input.value.trim();
+    actions_input.value = actions_input.value.trim();
+
+    name = name_input.value;
+    conditions = conditions_input.value;
+    actions = actions_input.value;
+
+    if ((! conditions) || (! actions))
+    {
+        return spinners.BAIL;
+    }
+
+    api.filters.update_filter(filter.dataset.id, name, conditions, actions, callback);
+}
+
+function on_pageload()
+{
+}
+document.addEventListener("DOMContentLoaded", on_pageload);
+</script>
+</html>

@@ -1,0 +1,10 @@
+{% macro make_header(site, request) %}
+<nav id="header">
+    <a class="header_element" href="/">BringRSS</a>
+    <a class="header_element" href="/filters">Filters</a>
+    <a class="header_element" href="/about">About</a>
+    {% if site.demo_mode %}
+    <span class="demo_mode_alert" title="The site is in demo mode. No changes you make will be saved.">(demo mode)</span>
+    {% endif %}
+</nav>
+{% endmacro %}

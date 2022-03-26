@@ -1,0 +1,1311 @@
+﻿<!DOCTYPE html><html lang="en"><head>
+    <meta charset="utf-8">
+<style type="text/css" media="screen">/*savepage-import-url=../css/common.css*//* ----- general ----- */
+
+a.skip {
+  display: none;
+}
+
+div.centered {
+  text-align: center;
+}
+
+p.centered {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* ----- logo ----- */
+
+
+#f {
+  background-color: transparent;
+  color: #cc0000;
+}
+
+#e1 {
+  background-color: transparent;
+  color: #009900;
+}
+
+#e2 {
+  background-color: transparent;
+  color: #3366cc;
+}
+
+#d {
+  background-color: transparent;
+  color: #cc6633;
+}
+
+#logo p {
+  margin-top: 0.5em;
+  margin-bottom: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  font-weight: bold;
+}
+
+/* ----- navbar ----- */
+
+/* rounded corners from <http://www.albin.net/CSS/RoundedCorners/> */
+.navbarWrapper {
+  margin-top: 10px;
+  margin-bottom: 30px;
+  margin-left: auto;
+  margin-right: auto;
+  width: 50%;
+  padding: 0px;
+  border: 0px;
+}
+
+.navbarContent {
+  margin: 0px;
+  padding: 0px;
+  border: 1px solid #000000;
+  background-color: #ffffff;
+  color: #000000;
+}
+
+.navbarContent p {
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+.roundedCornerSpacer {
+  margin: 0px; padding: 0px; border: 0px;
+  font-size: 1px; line-height: 1px;
+  clear: both;
+}
+
+.borderTL, .borderTR, .borderBL, .borderBR {
+    width: 14px; height: 14px;
+    padding: 0px; border: 0px;
+    z-index: 99;
+}
+
+.borderTL, .borderBL { float: left; clear: both; }
+.borderTR, .borderBR { float: right; clear: right; }
+.borderTL { margin: -1px 0px 0px -1px; }
+.borderTR { margin: -1px -1px 0px 0px; }
+.borderBL { margin: -14px 0px 0px 0px; }
+.borderBR { margin: -14px 0px 0px 0px; }
+
+.borderTL {
+    margin-left: -4px;
+    ma\rgin-left: -1px;
+}
+html>body .borderTL {
+    margin-left: -1px;
+}
+.borderTR {
+    margin-right: -4px;
+    ma\rgin-right: -1px;
+}
+html>body .borderTR {
+    margin-right: -1px;
+}
+.borderBL {
+    margin-left: -3px;
+    ma\rgin-left: 0px;
+}
+html>body .borderBL {
+    margin-left: 0px;
+}
+.borderBR {
+    margin-right: -3px;
+    ma\rgin-right: 0px;
+}
+html>body .borderBR {
+    margin-right: 0px;
+} 
+
+/* ----- footer ----- */
+
+address {
+  font-size: x-small;
+  font-style: normal;
+}
+
+#poweredby {
+  font-size: x-small;
+  background: transparent;
+  color: #333;
+}
+
+/*savepage-import-url=../css/validator.css*//* ----- validation form ----- */
+
+form#validation {
+  width: 550px;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 30px;
+  margin-bottom: 50px;
+}
+
+/* ----- results ----- */
+
+.message {
+  background-color: yellow;
+  color: black;
+}
+
+.marker {
+  background-color: transparent;
+  color: #cc0000;
+}
+
+.badOctet {
+  font-weight: bold;
+  color: inherit;
+  background: red;
+}
+
+div.specialmessage {
+  border: 1px solid black;
+  background-color: #ddd;
+  color: black;
+  margin-left: 2em;
+  margin-right: 2em;
+  padding-left: 1em;
+  padding-right: 1em;
+}
+
+/* ----- code listing ----- */
+
+/* code listing from <http://development.incutio.com/simon/numbered-code-experiment.html> */
+ol.codeListing {
+  font-family: monospace;
+  color: green;
+  background-color: #fff;
+  list-style-type: decimal-leading-zero;
+  list-style-position: inside;
+  width: 90%;
+}
+
+ol.codeListing li {
+  background-color: #eee;
+  color: black;
+  margin: 2px;
+}
+
+ol.codeListing li code {
+  background: transparent;
+  color: black;
+  margin-left: 2em;
+  white-space: normal !important;
+
+}
+
+ol.codeListing li code.b {
+  background: yellow;
+  color: black;
+}
+
+
+/*savepage-import-url=../css/documentation.css*/#main h2 {
+  font-size: 120%;
+}
+
+#main .docbody {
+  margin-left: 2em;
+  line-height: 140%;
+}
+
+#main p.meta {
+  font-size: xx-small;
+  background: transparent;
+  color: #999;
+  margin-top: 1em;
+  margin-left: 0;
+}
+
+/*savepage-import-url=../css/validator/base.css*//* @group Reset */
+
+html, body, form, fieldset, p, a, ul, ol, li, div, legend, label,
+br, input, button, textarea, h1, h2, h3, h4, h5, strong {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	font-weight: normal;
+	font-style: normal;
+	font-size: 100%;
+	font-family: Helvetica, Arial, Sans-Serif;
+	vertical-align: baseline;
+	background-color: white;
+	color: #1f2126;
+	line-height: 1;
+	text-align: left;
+}
+
+a img {
+	border: 0;
+}
+
+a:link, a:visited {
+	text-decoration: underline;
+	color: #365D95;
+}
+
+a:hover, a:active {
+	text-decoration: underline;
+	color: #1f2126;
+}
+
+ul, ol {
+	list-style: none;
+}
+
+abbr[title], acronym[title], span[title], strong[title] {
+	border-bottom: thin dotted;
+	cursor: help;
+}
+
+acronym:hover, abbr:hover {
+	cursor: help;
+}
+
+/* @end */
+
+/* @group Basics */
+
+body {
+	padding-bottom: 6em;
+	min-width: 40em; /* for the tabs, mostly */
+}
+
+p {
+  line-height: 130%;   
+}
+
+strong { 
+  font-weight: bold;
+}
+
+h2 { 
+    color: #690;
+    font-family:Verdana,Arial,sans-serif;
+    background-color: white;
+    font-size: 1.3em;
+    margin-bottom: 1em;    
+}
+
+h3 {
+    font-family:Verdana,Arial,sans-serif;
+    color: #690;
+    background-color: white;
+    font-size: 1.1em;
+    border-bottom: 1px dotted #aaaa77;
+    text-decoration: none;
+    margin-top: 1em;
+    margin-bottom: 1em;
+} 
+
+h4 {
+    font-family:Verdana,Arial,sans-serif;
+    color: #690;
+    font-style: italic;
+    text-decoration: none;
+    font-size: .9em;
+    font-weight:600;
+    margin-top: 1.5em;
+    margin-bottom: .5em;
+}
+
+h5,h6 {
+    font-family:Verdana,Arial,sans-serif;
+    color: #11111a;
+    background-color: white;
+    font-weight: normal;
+    font-size: small;
+    margin-top: 1em;
+    margin-left: 1em;
+    margin-bottom: .7em;
+    }
+
+    /* tables in the documentation */
+
+    table {
+    }
+    td, th{
+    	padding: 6px;
+    }
+    
+/* @end */
+
+
+/* @group Inputs */
+
+input#url, input#uri, input#file, input#uploaded_file, input#keywords, input#short_desc, textarea {
+	font-family: Monaco, "Courier New", Monospace;
+	font-size: 0.9em;
+	border: 1px solid #bbb;
+	border-top: 1px solid #777;
+	border-bottom: 1px solid #ddd;
+	background: #fefefe /*savepage-url=https://validator.w3.org/images/textbg.png*/ url() no-repeat top left;
+	padding: 0.2em 0.2em;
+	max-width: 1000px;
+	font-variant: normal;
+}
+
+input#url, input#uri, input#file, input#uploaded_file {
+	width: 85%;
+	margin: 0.3em 0 0 1em;
+}
+
+input#file, input#uploaded_file {
+	width: 30em;
+}
+
+input#mailsearch, input#bugsearch {
+    background-color: #EAEBEE;
+    color: #365D95;
+    padding: .3em 1em;
+    border: 1px outset #ccc;
+  }
+  input#mailsearch:active, input#bugsearch:active {
+    border-style: inset !important;
+  }
+a.submit {
+	display: block;
+	width: 10em;
+	text-align: center;
+	margin: 0 auto;
+	background: /*savepage-url=https://validator.w3.org/images/button-left.png*/ url() no-repeat center left;
+	text-decoration: none;
+}
+
+a.submit span {
+	display: block;
+	padding: 1.2em 2em;
+	background: /*savepage-url=https://validator.w3.org/images/button-right.png*/ url() no-repeat center right;
+}
+
+textarea {
+	width: 98.5%;
+}
+form#validation {
+	width: auto;
+        max-width: 500px;
+	margin-left: auto;
+	margin-right: auto;
+	text-align: center;
+}
+form#validation input {
+  padding: 0.3em 0.4em 0.1em 0.3em;
+        background: #fff;                                                                                                                   
+  color: #365D95;                                                                                                                           
+        text-align: center;                                                                                                                 
+        border-bottom: 2px solid #444;                                                                                                      
+        border-right: 2px solid #444;                                                                                                       
+        border-top: 1px solid #aaa;                                                                                                         
+        border-left: 1px solid #aaa;                                                                                                        
+        background: #eee /*savepage-url=https://validator.w3.org/images/grad.png*/ url() repeat-x top left;                                                    
+        cursor: pointer;                                                                                                                    
+}
+form#validation input:active {                                                                                                              
+  color: #1f2126;                                                                                                                           
+        border-bottom: 1px solid #aaa;                                                                                                      
+        border-right: 1px solid #aaa;                                                                                                       
+        border-top: 2px solid #444;                                                                                                         
+        border-left: 2px solid #444;                                                                                                        
+}                                                                                                                                           
+form#validation input#url, form#validation input#rawdata {
+       width: 400px;
+        padding: 0.2em 0.2em;
+	color: black;
+        font-family: Monaco, "Courier New", Monospace;
+        font-size: 0.9em;
+        border: 1px solid #bbb;
+        border-top: 1px solid #777;
+        border-bottom: 1px solid #ddd;
+        background: #fefefe /*savepage-url=https://validator.w3.org/images/textbg.png*/ url() no-repeat top left;
+
+}
+
+
+p.submit_button input {
+	overflow: visible;
+	width: auto;
+	background: #fff;
+  color: #365D95;
+  padding: 0.3em 0.4em 0.1em 0.3em;
+	font-size: 1.2em;
+	width: 12em;
+	text-align: center;
+	border-bottom: 2px solid #444;
+	border-right: 2px solid #444;
+	border-top: 1px solid #aaa;
+	border-left: 1px solid #aaa;
+	background: #eee /*savepage-url=https://validator.w3.org/images/grad.png*/ url() repeat-x top left;
+	cursor: pointer;
+}
+
+p.submit_button input:active {
+  color: #1f2126;
+	border-bottom: 1px solid #aaa;
+	border-right: 1px solid #aaa;
+	border-top: 2px solid #444;
+	border-left: 2px solid #444;
+}
+
+label {
+	font-size: 0.9em;
+	padding-left: .2em;
+	padding-right: .2em;
+}
+
+div.options select {
+	margin-right: 0.8em;
+}
+
+div.options label {
+	margin-right: 0.3em;
+}
+
+
+div.options table, div.options tbody, div.options td, div.options th, div.options tr {
+	margin: 0;
+	padding: 0;
+}
+
+div.options table {
+	border-collapse: collapse;
+}
+
+div.options th, div.options th label {
+	font-weight: bold;
+}
+
+div.options td, div.options th {
+	padding: 0.5em 1.1em 0.5em 0;
+	text-align: left;
+}
+
+div.options td input {
+	margin-right: 0.2em;
+}
+
+div.options select {
+	width: 100%;
+}
+
+div.options table tr.subchoice th {
+    padding-left: 3em;
+}
+tr.subchoice th label {
+  padding-left: 0;
+}
+tr.subchoice th, tr.subchoice th label {
+  font-size: 1em;
+  font-weight: normal;
+}
+/* @end */
+
+/* @group Header */
+
+h1#title {
+	font-family: "Myriad Web", "Myriad Pro", "Gill Sans", Helvetica, Arial, Sans-Serif;
+	background-color: #365D95;
+	color: #fdfdfd;
+	font-size: 1.6em;
+	background: /*savepage-url=https://validator.w3.org/images/head-bl.png*/ url() bottom left no-repeat;
+	padding-bottom: 0.430em;
+}
+h1#title a, h1#title a img {
+background-color: #365D95;
+}
+
+h1 span {
+	border-bottom: 1px solid #6383b1;
+	border-color: #4e6f9e;
+}
+
+h1#title a:link, h1#title a:hover, h1#title a:visited, h1#title a:active {
+  color: #fdfdfd !important;
+  text-decoration: none;
+}
+
+h1#title img {
+	vertical-align: middle;
+	margin-right: 0.7em;
+}
+
+div#banner {
+	background: #365D95 /*savepage-url=https://validator.w3.org/images/head-br.png*/ url() bottom right no-repeat;
+	margin: 1.5em 2em;
+}
+
+p#tagline {
+	font-size: 0.7em;
+	margin: -2em 0 0 12.1em;
+	padding-bottom: 1em;
+	letter-spacing: 0.1em;
+	line-height: 100% !important;
+	color: #D0DCEE;
+	background-color: transparent;
+}
+
+ul#lang_choice {
+	position: absolute;
+	top: 0;
+	right: 0;
+	font-size: 0.7em;
+	padding: 0.8em 0;
+	margin-right: 3.3em;
+}
+
+ul#lang_choice a:link, ul#lang_choice a:visited {
+	text-decoration: none;
+}
+
+ul#lang_choice a:hover, ul#lang_choice a:active {
+	text-decoration: underline;
+}
+
+ul#lang_choice li {
+	display: inline;
+	padding-left: 0.5em;
+}
+
+/* @end */
+
+/* @group Tabs */
+
+ul#tabset_tabs {
+	height: 1.59em;
+}
+
+ul#tabset_tabs li {
+	cursor: pointer;
+	float: left;
+	margin-right: 0.245em;
+	background: #DADDE3 /*savepage-url=https://validator.w3.org/images/tab-tl.png*/ url() no-repeat top left;
+	border-bottom: 1px solid #CBD0DB;
+}
+
+ul#tabset_tabs li.selected {
+	background: #EAEBEE /*savepage-url=https://validator.w3.org/images/round-tl.png*/ url() no-repeat top left;
+	border-bottom: 1px solid #EAEBEE;
+}
+
+ul#tabset_tabs li.selected a:link, ul#tabset_tabs li.selected a:visited {
+	color: #1f2126;
+	background: #EAEBEE /*savepage-url=https://validator.w3.org/images/round-tr.png*/ url() no-repeat top right;
+}
+
+ul#tabset_tabs li span {
+	color: #616571;
+}
+
+body ul#tabset_tabs li.selected a span {
+	color: #3d424f;
+}
+
+ul#tabset_tabs li a:link, ul#tabset_tabs li a:visited {
+	color: #365D95;
+	display: block;
+	padding: 0.515em 1.3em 0.215em 0.8em;
+	background: #DADDE3 /*savepage-url=https://validator.w3.org/images/tab-tr.png*/ url() no-repeat top right;
+	margin-left: 0.5em;
+	font-size: 0.9em;
+	font-weight: bold;
+	text-decoration: none;
+}
+
+ul#tabset_tabs li a:hover, ul#tabset_tabs li a:active {
+	color: #1f2126;
+}
+
+ul#tabset_tabs li a:hover span, ul#tabset_tabs li a:active span {
+	color: #3d424f;
+}
+
+ul#tabset_tabs li.selected span {
+	color: #5d6371;
+}
+
+/* @end */
+
+/* @group Contents */
+
+div#frontforms {
+	background: #fff;
+	padding: 0 2em;
+}
+
+div#fields {
+	clear: both;
+	background: #EAEBEE /*savepage-url=https://validator.w3.org/images/round-tr.png*/ url() no-repeat top right;
+	padding: 0.5em 1.3em;
+	border-bottom: 1px solid #DCDDE0;
+}
+
+div#fields legend, div#fields p, div#fields fieldset, div#fields form,div#fields form fieldset legend a, div#fields form p label, div#fields tr label   {
+  background-color: #EAEBEE;
+}
+
+fieldset {
+	background: #EAEBEE;
+}
+
+legend {
+	font-size: 1.1em;
+	padding: 1em 0 0.23em;
+	letter-spacing: 0.06em;
+}
+
+legend a:link, legend a:visited, legend a:hover, legend a:active {
+	text-decoration: none;
+}
+
+legend.toggletext {
+	cursor: pointer;
+	padding-left: 0.8em;
+	background: #EAEBEE /*savepage-url=https://validator.w3.org/images/arrow-closed.png*/ url() 0 1.2em no-repeat;
+}
+
+legend.toggled {
+	background: #EAEBEE /*savepage-url=https://validator.w3.org/images/arrow-open.png*/ url() 0 1.4em no-repeat;
+}
+
+p.instructions {
+	color: #4D525E;
+	font-size: 0.80em;
+	padding-bottom: 1em;
+	padding-top: 0.5em;
+}
+
+p.instructions label {
+	color: #4D525E;
+	padding: 0;
+	margin: 0;
+	font-size: 1em;
+}
+
+div.options {
+	padding: 0.7em 0 0.5em 1em;
+}
+
+div.options, p.submit_button, p.instructions, p#note {
+	border-top: 1px solid #cbcdd5;
+	background: #EAEBEE /*savepage-url=https://validator.w3.org/images/double.png*/ url() left top repeat-x;
+}
+
+p.submit_button {
+	padding: 0.4em 0 0;
+	margin: 0;
+	margin-top: 1.3em;
+	text-align: center;
+}
+
+
+p#note {
+	clear: both;
+	color: #4D525E;
+	font-size: 0.9em;
+	padding: 0.5em 0 0.1em;
+}
+
+/* @end */
+
+/* @group Menu */
+
+ul#menu {
+	text-align: center;
+	margin: 1em 2em;
+	background: #EAEBEE /*savepage-url=https://validator.w3.org/images/round-br.png*/ url() no-repeat bottom right;
+	padding: 0.5em 0 0.3em;
+	border-top: 1px solid #DCDDE0;
+}
+
+ul#menu span {
+	display: none;
+}
+
+ul#menu a:link, ul#menu a:visited {
+	background: #EAEBEE;
+	color: #365D95;
+	text-decoration: none;
+}
+
+ul#menu a:hover, ul#menu a:active {
+	color: #1f2126;
+	text-decoration: underline;
+}
+
+ul#menu li {
+	display: inline;
+	margin-right: 0.8em;
+}
+
+
+
+/* @end */
+
+/* @group Footer */
+
+div#footer {
+	padding: 0 2em;
+}
+
+p#activity_logos {
+	float: left;
+	margin-right: 2em;
+}
+
+p#support_logo {
+	float: right;
+	font-size: 0.8em;
+	text-align: center;
+	margin-left: 2em;
+}
+
+p.copyright {
+	text-align: center;
+	text-transform: uppercase;
+	font-size: 0.7em;
+	line-height: 1.4;
+}
+
+p.copyright, p.copyright a {
+	text-decoration: none;
+	color: #7C8395;
+}
+
+p.copyright a:link, p.copyright a:visited {
+	color: #A3756E;
+}
+
+p.copyright a:hover, p.copyright a:active {
+	color: #7D4A42;
+}
+
+p#version_info {
+    font-size:      small;
+    text-align: center;
+    color: #888;
+    background-color: white;
+}
+
+/* @end */
+
+/* @group Docs */
+
+div.doc, div#main {
+  margin: 1em 2em;
+	padding: 0.5em 0 0.3em;	  
+}
+
+
+/* Set line height to 1.4x (from 1.3x on general site) to allow for various inline decoration. */
+div.doc p, div.doc li {
+  line-height: 150% !important; 
+}
+div.doc p {
+  margin-bottom: .7em;
+  margin-top: .5em;
+}
+
+div.doc p, div.doc dt, div.doc ul, div.doc ol {
+    margin-left: 1.5em;
+    margin-right: 1.5em;
+}
+
+div.doc ul li {
+  list-style-type: disc;
+  margin-left: 1em;
+}
+
+/* documentation - table of contents */
+#toc { /* making the toc a bit more compact and standing out */
+    font-size: .85em;
+    font-weight: bold;
+    margin-bottom: 2em;
+    margin-left: 3em;
+}
+
+div.doc div#toc ol {
+   list-style-type: decimal;
+}
+div.doc div#toc ol li {
+  line-height: 130%;
+  font-weight: bold;
+}
+div.doc div#toc ol li ol {
+   list-style-type: lower-alpha;
+   font-weight: normal;
+   margin-left: 1em;
+}
+div.doc div#toc ol li ol li ol{
+   list-style-type: lower-roman;
+}
+
+
+/* documentation - error explanations */
+dl#expl dt code { /* headings for an error */
+  white-space: normal;
+  font-weight: bold;
+}
+
+dl#expl dt {
+  border-top: 1px dashed black;
+  margin-top: 2em;
+  margin-bottom: 1em;
+}
+
+div.doc dt {
+  margin-top: 1.2em;
+  margin-bottom: .2em;
+}
+div.doc dt, div.doc dt a {
+  font-style: italic;
+}
+div.doc dd {
+  margin-right: 0; /* no need for the extra margin if we nicely put the text of the dd in a paragraph */
+}
+div.doc var { /* headings for an error */
+  color: #006;
+}
+
+/* A snippet of code used inline. */
+div.doc code {
+  white-space: normal;
+  display: inline;
+  padding-left: .2em;
+  padding-right: .2em;
+  color:      black;
+  font-family: Monaco, "Courier New", monospace;
+  border: 1px dotted #ccc;
+}
+
+div.doc code.block {
+  display: block;
+  padding: 1em;
+  white-space: pre;
+  margin-top: 1em;
+  margin-bottom: 1em;
+  margin-right:  3em;
+}
+
+div.doc code samp {
+  font-weight: normal;
+  color: black;
+  font-style: italic;
+}
+
+/* reference tables */
+
+div.doc table {
+	border-collapse: collapse;
+	border-right: 1px solid #ccc;
+}
+div.doc table td, .doc table th{
+	border-top: 0px solid #ddd;
+	border-bottom: 1px solid #ccc;
+	border-left: 1px solid #eee;
+	padding: 6px;
+	border-collapse: collapse;
+}
+div.doc table th {
+	background-color: #eee;
+	color: #11111A;
+	border-right: 1px solid #ccc;
+}
+
+div.doc table {
+  margin-top: 1em;
+  margin-bottom: .5em;
+ 	border-collapse: collapse;
+	border-right: 1px solid #ccc; 
+}
+
+div.doc td, div.doc th {
+	border-top: 0px solid #ddd;
+	border-bottom: 1px solid #ccc;
+	border-left: 1px solid #eee;
+	border-collapse: collapse;
+  
+}
+div.doc th {
+	background-color: #eee;
+	color: #11111A;
+	border-right: 1px solid #ccc;
+}
+
+/* @end */
+
+
+/* @group home page, news text */
+
+div.intro {
+  margin: 1em 2em;
+	padding: 0.5em 0 0.3em;	
+}
+
+#news dt {
+    font-weight: bold;
+     margin-top: 1.5em;
+     margin-bottom: .3em;
+   }
+
+#news dd {
+       margin-left: 2.5em;
+       margin-right: 1.5em;
+   }
+
+
+/* warning on the home page for test instances */
+#test_warning {
+    border-left: 1px solid #ccc;
+    border-right: 1px solid #ccc;
+    line-height: 160%;
+    text-align: center;
+    margin-top: 2em;
+	margin-left: 12%;
+	margin-right: 12%;
+	padding-left: 1.5em;
+   padding-right: 1.5em;
+	color: black;
+	background-color: white;
+}
+
+#test_warning img {
+    width: 1.3em;
+    vertical-align: middle;
+}
+
+/* W3C includes (donation and sponsorship program) */
+#w3c-include {}
+
+/* feedvalidator results */
+ol.codeListing {
+ margin: 0 0 2em 0;
+ width: auto;
+ max-width: 100%
+}
+ol.codeListing li {
+ padding: .2em;
+}
+ol.codeListing li a {
+ background-color: #eee;
+}
+ol.codeListing li a:hover, ol.codeListing li a:active {
+ text-decoration: none;
+}
+/* @end */
+
+</style>
+    <title>RSS 2.0 specification</title>
+  
+<style id="savepage-cssvariables">
+  :root {
+    --savepage-url-4: url(data:image/png;base64,);
+    --savepage-url-5: url(data:image/png;base64,);
+    --savepage-url-9: url(data:image/png;base64,);
+  }
+</style>
+<script id="savepage-shadowloader" type="application/javascript">
+  "use strict";
+  window.addEventListener("DOMContentLoaded",
+  function(event) {
+    savepage_ShadowLoader(5);
+  },false);
+  function savepage_ShadowLoader(c){createShadowDOMs(0,document.documentElement);function createShadowDOMs(a,b){var i;if(b.localName=="iframe"||b.localName=="frame"){if(a<c){try{if(b.contentDocument.documentElement!=null){createShadowDOMs(a+1,b.contentDocument.documentElement)}}catch(e){}}}else{if(b.children.length>=1&&b.children[0].localName=="template"&&b.children[0].hasAttribute("data-savepage-shadowroot")){b.attachShadow({mode:"open"}).appendChild(b.children[0].content);b.removeChild(b.children[0]);for(i=0;i<b.shadowRoot.children.length;i++)if(b.shadowRoot.children[i]!=null)createShadowDOMs(a,b.shadowRoot.children[i])}for(i=0;i<b.children.length;i++)if(b.children[i]!=null)createShadowDOMs(a,b.children[i])}}}
+</script>
+<meta name="savepage-url" content="https://validator.w3.org/feed/docs/rss2.html">
+<meta name="savepage-title" content="RSS 2.0 specification">
+<meta name="savepage-pubdate" content="Unknown">
+<meta name="savepage-from" content="https://validator.w3.org/feed/docs/rss2.html">
+<meta name="savepage-date" content="Fri Mar 04 2022 13:02:12 GMT-0800 (Pacific Standard Time)">
+<meta name="savepage-state" content="Basic Items; Retain cross-origin frames; Merge CSS images; Remove unsaved URLs; Remove hidden elements; Allow passive mixed content; Send referer headers with origin and path; Load lazy images in existing content; Max frame depth = 5; Max resource size = 50MB; Max resource time = 10s;">
+<meta name="savepage-version" content="27.1">
+<meta name="savepage-comments" content="">
+  </head>
+
+  <body>
+    <div id="banner">
+      <h1 id="title">
+              <a href="http://www.w3.org/"><img alt="W3C" width="110" height="61" id="logo" data-savepage-currentsrc="https://validator.w3.org/images/w3c.png" data-savepage-src="/images/w3c.png" src="data:image/png;base64,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"></a>
+<a data-savepage-href="./" href="https://validator.w3.org/feed/docs/"><span>Feed Validation Service</span></a>
+</h1>
+			  <p id="tagline">Check the syntax of Atom or RSS feeds</p>
+    </div>
+    <div id="main" class="doc">
+
+<h2>Contents</h2>
+
+<ul>
+  <li><a href="#whatIsRss">What is RSS?</a></li>
+  <li><a href="#sampleFiles">Sample files</a></li>
+  <li><a href="#aboutThisDocument">About this document</a></li>
+  <li><a href="#requiredChannelElements">Required channel elements</a></li>
+  <li><a href="#optionalChannelElements">Optional channel elements</a></li>
+  <li><a href="#hrelementsOfLtitemgt">Elements of &lt;item&gt;</a></li>
+  <li><a href="#comments">Comments</a></li>
+  <li><a href="#extendingRss">Extending RSS</a></li>
+  <li><a href="#roadmap">Roadmap</a></li>
+  <li><a href="#licenseAndAuthorship">License and authorship</a></li>
+</ul>
+
+<h2>What is RSS?<a name="whatIsRss"></a> <a href="#whatIsRss" title="What is RSS?"><img data-savepage-currentsrc="https://validator.w3.org/feed/docs/images/left-arrow.gif" data-savepage-src="images/left-arrow.gif" src="" height="9" width="11" border="0" alt="*"></a></h2>
+
+<p>RSS is a Web content syndication format.</p>
+
+<p>Its name is an acronym for <i><b>R</b>eally <b>S</b>imple <b>S</b>yndication.</i></p>
+
+<p>RSS is a dialect of XML. All RSS files must conform to the XML 1.0 <a href="http://www.w3.org/TR/REC-xml">specification</a>, as published on the World Wide Web Consortium (W3C) website.</p>
+
+<p>A summary of <a href="https://www.rssboard.org/rss-history">RSS version history</a>.</p>
+
+<p>At the top level, a RSS document is a &lt;rss&gt; element, with a mandatory attribute called version, that specifies the version of RSS that the document conforms to. If it conforms to this specification, the version attribute must be 2.0.</p>
+
+<p>Subordinate to the &lt;rss&gt; element is a single &lt;channel&gt; element, which contains information about the channel (metadata) and its contents.</p>
+
+<h2>Sample files<a name="sampleFiles"></a> <a href="#sampleFiles" title="Sample files"><img data-savepage-currentsrc="https://validator.w3.org/feed/docs/images/left-arrow.gif" data-savepage-src="images/left-arrow.gif" src="" height="9" width="11" border="0" alt="*"></a></h2>
+
+<p>Here are sample files for: RSS <a href="https://www.rssboard.org/files/sample-rss-091.xml">0.91</a>, <a href="https://www.rssboard.org/files/sample-rss-092.xml">0.92</a> and <a href="https://www.rssboard.org/files/sample-rss-2.xml">2.0</a>.</p>
+
+<p>Note that the sample files may point to documents and services that no longer exist. The 0.91 sample was created when the 0.91 docs were written. Maintaining a trail of samples seems like a good idea.</p>
+
+<h2>About this document<a name="aboutThisDocument"></a> <a href="#aboutThisDocument" title="About this document"><img data-savepage-currentsrc="https://validator.w3.org/feed/docs/images/left-arrow.gif" data-savepage-src="images/left-arrow.gif" src="" height="9" width="11" border="0" alt="*"></a></h2>
+
+<p><img data-savepage-currentsrc="https://validator.w3.org/feed/docs/images/flowers.gif" data-savepage-src="images/flowers.gif" src="" width="65" height="85" border="0" align="right" hspace="15" vspace="5" alt="A bouquet of flowers, the symbol of RSS 2.0">This document represents the current status of RSS, incorporating all changes and additions starting with the basic spec for <a href="https://www.rssboard.org/rss-0-9-1">RSS 0.91</a> (June 2000) and follows <a href="https://www.rssboard.org/rss-0-9-2">RSS 0.92</a> (December 2000), <a href="https://www.rssboard.org/rss-2-0">RSS 2.0</a> (August 2002), and <a href="https://www.rssboard.org/rss-2-0-1">RSS 2.0.1</a> (July 2003). Change notes are <a href="https://www.rssboard.org/rss-change-notes">here</a>.</p>
+
+<p>First we document the required and optional sub-elements of &lt;channel&gt;; and then document the sub-elements of &lt;item&gt;. The final sections answer frequently asked questions, and provide a roadmap for future evolution, and guidelines for extending RSS.</p>
+
+<p>The <a href="https://www.rssboard.org/rss-profile">RSS Profile</a> contains a set of recommendations for how to create RSS documents that work best in the wide and diverse audience of client software that supports the format.</p>
+
+<p>RSS documents can be tested for validity in the <a href="https://www.rssboard.org/rss-validator">RSS Validator</a>.</p>
+
+<h2>Required channel elements<a name="requiredChannelElements"></a> <a href="#requiredChannelElements" title="Required channel elements"><img data-savepage-currentsrc="https://validator.w3.org/feed/docs/images/left-arrow.gif" data-savepage-src="images/left-arrow.gif" src="" height="9" width="11" border="0" alt="*"></a></h2>
+
+<p>Here's a list of the required channel elements, each with a brief description, an example, and where available, a pointer to a more complete description.</p>
+
+<table cellspacing="10">
+<tbody><tr valign="top"><td>Element</td><td width="45%">Description</td><td>Example</td></tr>
+<tr valign="top"><td><span class="element">title</span></td><td>The name of the channel. It's how people refer to your service. If you have an HTML website that contains the same information as your RSS file, the title of your channel should be the same as the title of your website.</td><td class="examplecell">GoUpstate.com News Headlines</td></tr>
+<tr valign="top"><td><span class="element">link</span></td><td>The URL to the HTML website corresponding to the channel.</td><td class="examplecell">http://www.goupstate.com/</td></tr>
+<tr valign="top"><td><span class="element">description</span></td><td>Phrase or sentence describing the channel.</td><td class="examplecell">The latest news from GoUpstate.com, a Spartanburg Herald-Journal Web site.</td></tr>
+</tbody></table>
+
+<h2>Optional channel elements<a name="optionalChannelElements"></a> <a href="#optionalChannelElements" title="Optional channel elements"><img data-savepage-currentsrc="https://validator.w3.org/feed/docs/images/left-arrow.gif" data-savepage-src="images/left-arrow.gif" src="" height="9" width="11" border="0" alt="*"></a></h2>
+
+<p>Here's a list of optional channel elements.</p>
+
+<table cellspacing="10">
+<tbody><tr valign="top"><td>Element</td><td width="65%">Description</td><td>Example</td></tr>
+<tr valign="top"><td><span class="element">language</span></td><td>The language the channel is written in. This allows aggregators to group all Italian language sites, for example, on a single page. A list of allowable values for this element, as provided by Netscape, is <a href="https://www.rssboard.org/rss-language-codes">here</a>. You may also use <a href="http://www.w3.org/TR/REC-html40/struct/dirlang.html#langcodes">values defined</a> by the W3C.</td><td class="examplecell">en-us</td></tr>
+<tr valign="top"><td><span class="element">copyright</span></td><td>Copyright notice for content in the channel.</td><td class="examplecell">Copyright 2002, Spartanburg Herald-Journal</td></tr>
+<tr valign="top"><td><span class="element">managingEditor</span></td><td>Email address for person responsible for editorial content.</td><td class="examplecell">geo@herald.com (George Matesky)</td></tr>
+<tr valign="top"><td><span class="element">webMaster</span></td><td>Email address for person responsible for technical issues relating to channel.</td><td class="examplecell">betty@herald.com (Betty Guernsey)</td></tr>
+<tr valign="top"><td><span class="element">pubDate</span></td><td>The publication date for the content in the channel. For example, the <i>New York Times</i> publishes on a daily basis, the publication date flips once every 24 hours. That's when the pubDate of the channel changes. All date-times in RSS conform to the Date and Time Specification of <a href="http://asg.web.cmu.edu/rfc/rfc822.html">RFC 822</a>, with the exception that the year may be expressed with two characters or four characters (four preferred).</td><td class="examplecell">Sat, 07 Sep 2002 00:00:01 GMT</td></tr>
+<tr valign="top"><td><span class="element">lastBuildDate</span></td><td>The last time the content of the channel changed.</td><td class="examplecell">Sat, 07 Sep 2002 09:42:31 GMT</td></tr>
+<tr valign="top"><td><span class="element">category</span></td><td>Specify one or more categories that the channel belongs to. Follows the same rules as the &lt;item&gt;-level <a href="#ltcategorygtSubelementOfLtitemgt">category</a> element. More <a href="#syndic8">info</a>.</td><td class="examplecell">&lt;category&gt;Newspapers&lt;/category&gt;</td></tr>
+<tr valign="top"><td><span class="element">generator</span></td><td>A string indicating the program used to generate the channel.</td><td class="examplecell">MightyInHouse Content System v2.3</td></tr>
+<tr valign="top"><td><span class="element">docs</span></td><td>A URL that points to the <a href="https://www.rssboard.org/rss-specification">documentation</a> for the format used in the RSS file. It's probably a pointer to this page. It's for people who might stumble across an RSS file on a Web server 25 years from now and wonder what it is.</td><td class="examplecell">https://www.rssboard.org/rss-specification</td></tr>
+<tr valign="top"><td><span class="element">cloud</span></td><td>Allows processes to register with a cloud to be notified of updates to the channel, implementing a lightweight publish-subscribe protocol for RSS feeds. More info <a href="#ltcloudgtSubelementOfLtchannelgt">here</a>.</td><td class="examplecell">&lt;cloud domain="rpc.sys.com" port="80" path="/RPC2" registerProcedure="pingMe" protocol="soap"/&gt;</td></tr>
+<tr valign="top"><td><span class="element">ttl</span></td><td>ttl stands for time to live. It's a number of minutes that indicates how long a channel can be cached before refreshing from the source. More info <a href="#ltttlgtSubelementOfLtchannelgt">here</a>.</td><td class="examplecell">&lt;ttl&gt;60&lt;/ttl&gt;</td></tr>
+<tr valign="top"><td><span class="element">image</span></td><td>Specifies a GIF, JPEG or PNG image that can be displayed with the channel. More info <a href="#ltimagegtSubelementOfLtchannelgt">here</a>.</td><td></td></tr>
+<tr valign="top"><td><span class="element">rating</span></td><td>The <a href="http://www.w3.org/PICS/">PICS</a> rating for the channel.</td><td></td></tr>
+<tr valign="top"><td><span class="element">textInput</span></td><td>Specifies a text input box that can be displayed with the channel. More info <a href="#lttextinputgtSubelementOfLtchannelgt">here</a>.</td><td></td></tr>
+<tr valign="top"><td><span class="element">skipHours</span></td><td>A hint for aggregators telling them which hours they can skip. This element contains up to 24 &lt;hour&gt; sub-elements whose value is a number between 0 and 23, representing a time in GMT, when aggregators, if they support the feature, may not read the channel on hours listed in the &lt;skipHours&gt; element. The hour beginning at midnight is hour zero.</td><td></td></tr>
+<tr valign="top"><td><span class="element">skipDays</span></td><td>A hint for aggregators telling them which days they can skip. This element contains up to seven &lt;day&gt; sub-elements whose value is Monday, Tuesday, Wednesday, Thursday, Friday, Saturday or Sunday. Aggregators may not read the channel during days listed in the &lt;skipDays&gt; element.</td><td></td></tr>
+</tbody></table>
+
+<h3>&lt;image&gt; sub-element of &lt;channel&gt;<a name="ltimagegtSubelementOfLtchannelgt"></a> <a href="#ltimagegtSubelementOfLtchannelgt" title="<image> sub-element of <channel>"><img data-savepage-currentsrc="https://validator.w3.org/feed/docs/images/left-arrow.gif" data-savepage-src="images/left-arrow.gif" src="" height="9" width="11" border="0" alt="*"></a></h3>
+
+<p>&lt;image&gt; is an optional sub-element of &lt;channel&gt;, which contains three required and three optional sub-elements.</p>
+
+<p>&lt;url&gt; is the URL of a GIF, JPEG or PNG image that represents the channel.</p>
+
+<p>&lt;title&gt; describes the image, it's used in the ALT attribute of the HTML &lt;img&gt; tag when the channel is rendered in HTML.</p>
+
+<p>&lt;link&gt; is the URL of the site, when the channel is rendered, the image is a link to the site. (Note, in practice the image &lt;title&gt; and &lt;link&gt; should have the same value as the channel's &lt;title&gt; and &lt;link&gt;.</p>
+
+<p>Optional elements include &lt;width&gt; and &lt;height&gt;, numbers, indicating the width and height of the image in pixels. &lt;description&gt; contains text that is included in the TITLE attribute of the link formed around the image in the HTML rendering.</p>
+
+<p>Maximum value for width is 144, default value is 88.</p>
+
+<p>Maximum value for height is 400, default value is 31.</p>
+
+<h3>&lt;cloud&gt; sub-element of &lt;channel&gt;<a name="ltcloudgtSubelementOfLtchannelgt"></a> <a href="#ltcloudgtSubelementOfLtchannelgt" title="<cloud> sub-element of <channel>"><img data-savepage-currentsrc="https://validator.w3.org/feed/docs/images/left-arrow.gif" data-savepage-src="images/left-arrow.gif" src="" height="9" width="11" border="0" alt="*"></a></h3>
+
+<p>&lt;cloud&gt; is an optional sub-element of &lt;channel&gt;.</p>
+
+<p>It specifies a web service that supports the rssCloud interface which can be implemented in HTTP-POST, XML-RPC or SOAP 1.1.</p>
+
+<p>Its purpose is to allow processes to register with a cloud to be notified of updates to the channel, implementing a lightweight publish-subscribe protocol for RSS feeds.</p>
+
+<p class="example">&lt;cloud domain="rpc.sys.com" port="80" path="/RPC2" registerProcedure="myCloud.rssPleaseNotify" protocol="xml-rpc" /&gt;</p>
+
+<p>In this example, to request notification on the channel it appears in, you would send an XML-RPC message to rpc.sys.com on port 80, with a path of /RPC2. The procedure to call is myCloud.rssPleaseNotify.</p>
+
+<p>A full explanation of this element and the rssCloud interface is <a href="https://www.rssboard.org/rsscloud-interface">here</a>.</p>
+
+<h3>&lt;ttl&gt; sub-element of &lt;channel&gt;<a name="ltttlgtSubelementOfLtchannelgt"></a> <a href="#ltttlgtSubelementOfLtchannelgt" title="<ttl> sub-element of <channel>"><img data-savepage-currentsrc="https://validator.w3.org/feed/docs/images/left-arrow.gif" data-savepage-src="images/left-arrow.gif" src="" height="9" width="11" border="0" alt="*"></a></h3>
+
+<p>&lt;ttl&gt; is an optional sub-element of &lt;channel&gt;.</p>
+
+<p>ttl stands for time to live. It's a number of minutes that indicates how long a channel can be cached before refreshing from the source. This makes it possible for RSS sources to be managed by a file-sharing network such as Gnutella.</p>
+
+<p>Example:</p>
+
+<p class="example">&lt;ttl&gt;60&lt;/ttl&gt;</p>
+
+<h3>&lt;textInput&gt; sub-element of &lt;channel&gt;<a name="lttextinputgtSubelementOfLtchannelgt"></a> <a href="#lttextinputgtSubelementOfLtchannelgt" title="<textInput> sub-element of <channel>"><img data-savepage-currentsrc="https://validator.w3.org/feed/docs/images/left-arrow.gif" data-savepage-src="images/left-arrow.gif" src="" height="9" width="11" border="0" alt="*"></a></h3>
+
+<p>A channel may optionally contain a &lt;textInput&gt; sub-element, which contains four required sub-elements.</p>
+
+<p>&lt;title&gt; -- The label of the Submit button in the text input area.</p>
+
+<p>&lt;description&gt; -- Explains the text input area.</p>
+
+<p>&lt;name&gt; -- The name of the text object in the text input area.</p>
+
+<p>&lt;link&gt; -- The URL of the CGI script that processes text input requests.</p>
+
+<p>The purpose of the &lt;textInput&gt; element is something of a mystery. You can use it to specify a search engine box. Or to allow a reader to provide feedback. Most aggregators ignore it.</p>
+
+<h2>Elements of &lt;item&gt;<a name="hrelementsOfLtitemgt"></a> <a href="#hrelementsOfLtitemgt" title="Elements of <item>"><img data-savepage-currentsrc="https://validator.w3.org/feed/docs/images/left-arrow.gif" data-savepage-src="images/left-arrow.gif" src="" height="9" width="11" border="0" alt="*"></a></h2>
+
+<p>A channel may contain any number of &lt;item&gt;s. An item may represent a "story" -- much like a story in a newspaper or magazine; if so its description is a synopsis of the story, and the link points to the full story. An item may also be complete in itself, if so, the description contains the text (entity-encoded HTML is allowed; see <a href="https://www.rssboard.org/rss-encoding-examples">examples</a>), and the link and title may be omitted. All elements of an item are optional, however at least one of title or description must be present.</p>
+
+<table cellspacing="10">
+<tbody><tr valign="top"><td>Element</td><td>Description</td><td width="50%">Example</td></tr>
+<tr valign="top"><td><span class="element">title</span></td><td>The title of the item.</td><td class="examplecell">Venice Film Festival Tries to Quit Sinking</td></tr>
+<tr valign="top"><td><span class="element">link</span></td><td>The URL of the item.</td><td class="examplecell">http://nytimes.com/2004/12/07FEST.html</td></tr>
+<tr valign="top"><td><span class="element">description</span></td><td>The item synopsis.</td><td class="examplecell">&lt;description&gt;Some of the most heated chatter at the Venice Film Festival this week was about the way that the arrival of the stars at the Palazzo del Cinema was being staged.&lt;/description&gt;</td></tr>
+<tr valign="top"><td><span class="element">author</span></td><td>Email address of the author of the item. <a href="#ltauthorgtSubelementOfLtitemgt">More</a>.</td><td></td></tr>
+<tr valign="top"><td><span class="element">category</span></td><td>Includes the item in one or more categories. <a href="#ltcategorygtSubelementOfLtitemgt">More</a>.</td><td></td></tr>
+<tr valign="top"><td><span class="element">comments</span></td><td>URL of a page for comments relating to the item. <a href="#ltcommentsgtSubelementOfLtitemgt">More</a>.</td><td></td></tr>
+<tr valign="top"><td><span class="element">enclosure</span></td><td>Describes a media object that is attached to the item. <a href="#ltenclosuregtSubelementOfLtitemgt">More</a>.</td><td></td></tr>
+<tr valign="top"><td><span class="element">guid</span></td><td>A string that uniquely identifies the item. <a href="#ltguidgtSubelementOfLtitemgt">More</a>.</td><td></td></tr>
+<tr valign="top"><td><span class="element">pubDate</span></td><td>Indicates when the item was published. <a href="#ltpubdategtSubelementOfLtitemgt">More</a>.</td><td></td></tr>
+<tr valign="top"><td><span class="element">source</span></td><td>The RSS channel that the item came from. <a href="#ltsourcegtSubelementOfLtitemgt">More</a>.</td><td></td></tr>
+</tbody></table>
+
+<h3>&lt;source&gt; sub-element of &lt;item&gt;<a name="ltsourcegtSubelementOfLtitemgt"></a> <a href="#ltsourcegtSubelementOfLtitemgt" title="<source> sub-element of <item>"><img data-savepage-currentsrc="https://validator.w3.org/feed/docs/images/left-arrow.gif" data-savepage-src="images/left-arrow.gif" src="" height="9" width="11" border="0" alt="*"></a></h3>
+
+<p>&lt;source&gt; is an optional sub-element of &lt;item&gt;.</p>
+
+<p>Its value is the name of the RSS channel that the item came from, derived from its &lt;title&gt;. It has one required attribute, url, which links to the XMLization of the source.</p>
+
+<p class="example">&lt;source url="http://www.tomalak.org/links2.xml"&gt;Tomalak's Realm&lt;/source&gt;</p>
+
+<p>The purpose of this element is to propagate credit for links, to publicize the sources of news items. It can be used in the Post command of an aggregator. It should be generated automatically when forwarding an item from an aggregator to a weblog authoring tool.</p>
+
+<h3>&lt;enclosure&gt; sub-element of &lt;item&gt;<a name="ltenclosuregtSubelementOfLtitemgt"></a> <a href="#ltenclosuregtSubelementOfLtitemgt" title="<enclosure> sub-element of <item>"><img data-savepage-currentsrc="https://validator.w3.org/feed/docs/images/left-arrow.gif" data-savepage-src="images/left-arrow.gif" src="" height="9" width="11" border="0" alt="*"></a></h3>
+
+<p>&lt;enclosure&gt; is an optional sub-element of &lt;item&gt;.</p>
+
+<p>It has three required attributes. url says where the enclosure is located, length says how big it is in bytes, and type says what its type is, a standard MIME type.</p>
+
+<p>The url must be an http url.</p>
+
+<p class="example">&lt;enclosure url="http://www.scripting.com/mp3s/weatherReportSuite.mp3" length="12216320" type="audio/mpeg" /&gt;</p>
+
+<p>A use-case narrative for this element is <a href="https://www.rssboard.org/rss-enclosures-use-case">here</a>.</p>
+
+<h3>&lt;category&gt; sub-element of &lt;item&gt;<a name="ltcategorygtSubelementOfLtitemgt"></a> <a href="#ltcategorygtSubelementOfLtitemgt" title="<category> sub-element of <item>"><img data-savepage-currentsrc="https://validator.w3.org/feed/docs/images/left-arrow.gif" data-savepage-src="images/left-arrow.gif" src="" height="9" width="11" border="0" alt="*"></a></h3>
+
+<p>&lt;category&gt; is an optional sub-element of &lt;item&gt;.</p>
+
+<p>It has one optional attribute, domain, a string that identifies a categorization taxonomy.</p>
+
+<p>The value of the element is a forward-slash-separated string that identifies a hierarchic location in the indicated taxonomy. Processors may establish conventions for the interpretation of categories. Two examples are provided below:</p>
+
+<p class="example">&lt;category&gt;Grateful Dead&lt;/category&gt;</p>
+
+<p class="example">&lt;category domain="http://www.fool.com/cusips"&gt;MSFT&lt;/category&gt;</p>
+
+<p>You may include as many category elements as you need to, for different domains, and to have an item cross-referenced in different parts of the same domain.</p>
+
+<h3>&lt;pubDate&gt; sub-element of &lt;item&gt;<a name="ltpubdategtSubelementOfLtitemgt"></a> <a href="#ltpubdategtSubelementOfLtitemgt" title="<pubDate> sub-element of <item>"><img data-savepage-currentsrc="https://validator.w3.org/feed/docs/images/left-arrow.gif" data-savepage-src="images/left-arrow.gif" src="" height="9" width="11" border="0" alt="*"></a></h3>
+
+<p>&lt;pubDate&gt; is an optional sub-element of &lt;item&gt;.</p>
+
+<p>Its value is a <a href="http://asg.web.cmu.edu/rfc/rfc822.html">date</a>, indicating when the item was published. If it's a date in the future, aggregators may choose to not display the item until that date.</p>
+
+<p class="example">&lt;pubDate&gt;Sun, 19 May 2002 15:21:36 GMT&lt;/pubDate&gt;</p>
+
+<h3>&lt;guid&gt; sub-element of &lt;item&gt;<a name="ltguidgtSubelementOfLtitemgt"></a> <a href="#ltguidgtSubelementOfLtitemgt" title="<guid> sub-element of <item>"><img data-savepage-currentsrc="https://validator.w3.org/feed/docs/images/left-arrow.gif" data-savepage-src="images/left-arrow.gif" src="" height="9" width="11" border="0" alt="*"></a></h3>
+
+<p>&lt;guid&gt; is an optional sub-element of &lt;item&gt;.</p>
+
+<p>guid stands for globally unique identifier. It's a string that uniquely identifies the item. When present, an aggregator may choose to use this string to determine if an item is new.</p>
+
+<p class="example">&lt;guid&gt;http://some.server.com/weblogItem3207&lt;/guid&gt;</p>
+
+<p>There are no rules for the syntax of a guid. Aggregators must view them as a string. It's up to the source of the feed to establish the uniqueness of the string.</p>
+
+<p>If the guid element has an attribute named isPermaLink with a value of true, the reader may assume that it is a permalink to the item, that is, a url that can be opened in a Web browser, that points to the full item described by the &lt;item&gt; element.  An example:</p>
+
+<p class="example">&lt;guid isPermaLink="true"&gt;http://inessential.com/2002/09/01.php#a2&lt;/guid&gt;</p>
+
+<p>isPermaLink is optional, its default value is true. If its value is false, the guid may not be assumed to be a url, or a url to anything in particular.</p>
+
+<h3>&lt;comments&gt; sub-element of &lt;item&gt;<a name="ltcommentsgtSubelementOfLtitemgt"></a> <a href="#ltcommentsgtSubelementOfLtitemgt" title="<comments> sub-element of <item>"><img data-savepage-currentsrc="https://validator.w3.org/feed/docs/images/left-arrow.gif" data-savepage-src="images/left-arrow.gif" src="" height="9" width="11" border="0" alt="*"></a></h3>
+
+<p>&lt;comments&gt; is an optional sub-element of &lt;item&gt;.</p>
+
+<p>If present, it is the url of the comments page for the item.</p>
+
+<p class="example">&lt;comments&gt;http://ekzemplo.com/entry/4403/comments&lt;/comments&gt;</p>
+
+<p>More about comments <a href="https://www.rssboard.org/rss-weblog-comments-use-case">here</a>.</p>
+
+<h3>&lt;author&gt; sub-element of &lt;item&gt;<a name="ltauthorgtSubelementOfLtitemgt"></a> <a href="#ltauthorgtSubelementOfLtitemgt" title="<author> sub-element of <item>"><img data-savepage-currentsrc="https://validator.w3.org/feed/docs/images/left-arrow.gif" data-savepage-src="images/left-arrow.gif" src="" height="9" width="11" border="0" alt="*"></a></h3>
+
+<p>&lt;author&gt; is an optional sub-element of &lt;item&gt;.</p>
+
+<p>It's the email address of the author of the item. For newspapers and magazines syndicating via RSS, the author is the person who wrote the article that the &lt;item&gt; describes. For collaborative weblogs, the author of the item might be different from the managing editor or webmaster. For a weblog authored by a single individual it would make sense to omit the &lt;author&gt; element.</p>
+
+<p class="example">&lt;author&gt;lawyer@boyer.net (Lawyer Boyer)&lt;/author&gt;</p>
+
+<h2>Comments<a name="comments"></a> <a href="#comments" title="Comments"><img data-savepage-currentsrc="https://validator.w3.org/feed/docs/images/left-arrow.gif" data-savepage-src="images/left-arrow.gif" src="" height="9" width="11" border="0" alt="*"></a></h2>
+
+<p>RSS places restrictions on the first non-whitespace characters of the data in &lt;link&gt; and &lt;url&gt; elements. The data in these elements must begin with an <a href="http://www.iana.org/assignments/uri-schemes">IANA-registered</a> URI scheme, such as http://, https://, news://, mailto: and ftp://. Prior to RSS 2.0, the specification only allowed http:// and ftp://, however, in practice other URI schemes were in use by content developers and supported by aggregators. Aggregators may have limits on the URI schemes they support. Content developers should not assume that all aggregators support all schemes.</p>
+
+<p>In RSS 0.91, various elements are restricted to 500 or 100 characters. There can be no more than 15 &lt;items&gt; in a 0.91 &lt;channel&gt;. There are no string-length or XML-level limits in RSS 0.92 and greater. Processors may impose their own limits, and generators may have preferences that say no more than a certain number of &lt;item&gt;s can appear in a channel, or that strings are limited in length.</p>
+
+<p>In RSS 2.0, <a name="syndic8"></a>a provision is made for linking a channel to its identifier in a cataloging system, using the channel-level category feature, described above. For example, to link a channel to its Syndic8 identifier, include a category element as a sub-element of &lt;channel&gt;, with domain "Syndic8", and value the identifier for your channel in the Syndic8 database. The appropriate category element for Scripting News would be &lt;category domain="Syndic8"&gt;1765&lt;/category&gt;.</p>
+
+<p>A frequently asked question about &lt;guid&gt;s is how do they compare to &lt;link&gt;s. Aren't they the same thing? Yes, in some content systems, and no in others. In some systems, &lt;link&gt; is a permalink to a weblog item. However, in other systems, each &lt;item&gt; is a synopsis of a longer article, &lt;link&gt; points to the article, and &lt;guid&gt; is the permalink to the weblog entry. In all cases, it's recommended that you provide the guid, and if possible make it a permalink. This enables aggregators to not repeat items, even if there have been editing changes.</p>
+
+<p>If you have questions about the RSS 2.0 format, please post them on the <a href="http://groups.yahoo.com/group/rss-public">RSS-Public</a> mailing list. The list, maintained by the RSS Advisory Board, serves as a support resource for users, authors and developers who are creating and using content in the format.</p>
+
+<h2>Extending RSS<a name="extendingRss"></a> <a href="#extendingRss" title="Extending RSS"><img data-savepage-currentsrc="https://validator.w3.org/feed/docs/images/left-arrow.gif" data-savepage-src="images/left-arrow.gif" src="" height="9" width="11" border="0" alt="*"></a></h2>
+
+<p>RSS originated in 1999, and has strived to be a simple, easy to understand format, with relatively modest goals. After it became a popular format, developers wanted to extend it using modules defined in namespaces, as <a href="http://www.w3.org/TR/REC-xml-names/">specified</a> by the W3C.</p>
+
+<p>RSS 2.0 adds that capability, following a simple rule. A RSS feed may contain elements and attributes not described on this page, only if those elements and attributes are defined in a namespace.</p>
+
+<p>The elements defined in this document are not themselves members of a namespace, so that RSS 2.0 can remain compatible with previous versions in the following sense -- a version 0.91 or 0.92 file is also a valid 2.0 file. If the elements of RSS 2.0 were in a namespace, this constraint would break, a version 0.9x file <i>would not</i> be a valid 2.0 file.</p>
+
+<h2>Roadmap<a name="roadmap"></a> <a href="#roadmap" title="Roadmap"><img data-savepage-currentsrc="https://validator.w3.org/feed/docs/images/left-arrow.gif" data-savepage-src="images/left-arrow.gif" src="" height="9" width="11" border="0" alt="*"></a></h2>
+
+<p>RSS is by no means a perfect format, but it is very popular and widely supported. Having a settled spec is something RSS has needed for a long time. The purpose of this work is to help it become a unchanging thing, to foster growth in the market that is developing around it, and to clear the path for innovation in new syndication formats. Therefore, the RSS spec is, for all practical purposes, frozen at version 2.0.1. We anticipate possible 2.0.2 or 2.0.3 versions, etc. only for the purpose of clarifying the specification, not for adding new features to the format. Subsequent work should happen in modules, using namespaces, and in completely new syndication formats, with new names.</p>
+
+<h2>License and authorship<a name="licenseAndAuthorship"></a> <a href="#licenseAndAuthorship" title="License and authorship"><img data-savepage-currentsrc="https://validator.w3.org/feed/docs/images/left-arrow.gif" data-savepage-src="images/left-arrow.gif" src="" height="9" width="11" border="0" alt="*"></a></h2>
+
+<p>This document is authored by the <a href="https://www.rssboard.org/">RSS Advisory Board</a> and is offered under the terms of the Creative Commons <a href="http://creativecommons.org/licenses/by-sa/2.0/" rel="nofollow">Attribution/Share Alike</a> license, based on an original document published by the Berkman Center for Internet &amp; Society.</p>
+</div><!-- main -->
+<ul class="navbar" id="menu">
+    <li>
+    <a data-savepage-href="../" href="https://validator.w3.org/feed/" accesskey="1" title="Go to the Home Page for The W3C Feed Validation Service">Home</a></li>
+    <li><a data-savepage-href="../about.html" href="https://validator.w3.org/feed/about.html" title="Information About this Service">About...</a></li>
+    <li><a data-savepage-href="../whatsnew.html" href="https://validator.w3.org/feed/whatsnew.html" title="The changes made to this service recently">News</a></li>
+    <li><a data-savepage-href="./" href="https://validator.w3.org/feed/docs/" accesskey="3" title="Documentation for this Service">Docs</a></li>
+</ul>
+<div id="footer">
+<address>
+Maintained by the <a href="http://www.w3.org/QA/Tools/qa-dev">W3C qa-dev group</a><br>
+This service uses the <a href="https://github.com/w3c/feedvalidator">Feed validator software</a>.
+</address>
+</div>
+
+
+
+
+<script data-savepage-src="chrome-extension://hhojmcideegachlhfgfdhailpfhgknjm/web_accessible_resources/index.js"></script></body></html>
