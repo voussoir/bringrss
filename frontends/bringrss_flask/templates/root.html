@@ -1653,7 +1653,7 @@ function _up_down(sibling_func)
     first_selected_news = neighbor;
 
     mark_read_with_batching(neighbor.dataset.id);
-    // console.log(`updown ${neighbor.dataset.id}`);
+    showing_news_id = neighbor.dataset.id;
     clearTimeout(show_news_after_timeout);
     show_news_after_timeout = setTimeout(() => {show_news_in_newsreader(neighbor);}, 100);
     mark_read_and_propagate_unread_delta(neighbor);
@@ -1779,6 +1779,10 @@ function set_newsreader_news_text(html)
     }
 }
 
+// When switching news items quickly, a previously requested news item might
+// load after the user has already clicked on another one. So we store the most
+// recently clicked id and don't show a previously clicked news whose callback
+// has just come in.
 let showing_news_id = null;
 function show_news_in_newsreader(news)
 {
@@ -1786,7 +1790,7 @@ function show_news_in_newsreader(news)
     {
         if (news_object.id != showing_news_id)
         {
-            // The user must have clickedon something else in the meantime.
+            // The user must have clicked on something else in the meantime.
             return;
         }
         clearTimeout(show_news_after_timeout);
