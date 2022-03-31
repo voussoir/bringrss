@@ -114,7 +114,7 @@ DEFAULT_DBNAME = 'bringrss.db'
 # behavior changes.
 VERSION = '0.0.1'
 http_session = requests.Session()
-http_session.headers['User-Agent'] = f'BringRSS v{VERSION} github.com/voussoir/bringrss'
+http_session.headers['User-Agent'] = f'voussoir/BringRSS v{VERSION}'
 
 # Thank you h-j-13
 # https://stackoverflow.com/a/54629675/5430534
