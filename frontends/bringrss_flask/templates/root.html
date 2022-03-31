@@ -443,6 +443,8 @@ body
 </body>
 
 <script type="text/javascript">
+DEMO_MODE = {{'true' if site.demo_mode else 'false'}};
+
 AUTOMATIC_RELOAD_FEEDS_INTERVAL = 5 * 60 * 1000;
 
 const newsreader = document.getElementById("newsreader");
@@ -507,6 +509,11 @@ function add_feed_submit(event)
         const settings_url = `/feed/${feed_id}/settings`;
         window.location.href = settings_url;
     }
+    if (DEMO_MODE)
+    {
+        contextmenus.hide_open_menus();
+        return spinners.BAIL;
+    }
     const rss_url = document.getElementById("add_feed_url_input").value.trim();
     if (! rss_url)
     {
@@ -541,6 +548,11 @@ function add_folder_submit(event)
         {
             input.value = "";
         }
+    }
+    if (DEMO_MODE)
+    {
+        contextmenus.hide_open_menus();
+        return spinners.BAIL;
     }
     const button = event.target;
     const rss_url = "";
