@@ -368,6 +368,9 @@ class BDBNewsMixin:
         elif updated is not None:
             published = updated
 
+        if updated is None and published is not None:
+            updated = published
+
         title = entry.find('title')
         if title:
             title = title.text.strip()
