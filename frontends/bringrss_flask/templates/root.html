@@ -1736,7 +1736,16 @@ function fix_newsreader_relative_links()
     {
         return;
     }
+    const news_list = document.getElementById("news");
+    const news = document.getElementById("news_" + showing_news_id);
+    const feed_id = news.dataset.feedId;
+    const feeds_list = document.getElementById("feeds");
+    const feed = document.getElementById("feed_" + feed_id);
+    const rss_url = feed.dataset.rssUrl;
+
+    newsreader_news_title.href = new URL(newsreader_news_title.getAttribute("href"), rss_url);
     const base_url = newsreader_news_title.href;
+
     function fixer(tagname, attribute)
     {
         for (const element of newsreader_news_text.getElementsByTagName(tagname))
@@ -1749,6 +1758,7 @@ function fix_newsreader_relative_links()
             element[attribute] = new URL(relative_url, base_url).href;
         }
     }
+
     fixer("a", "href");
     fixer("img", "src");
     fixer("video", "src");
