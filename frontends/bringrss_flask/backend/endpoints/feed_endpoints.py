@@ -34,7 +34,8 @@ def post_feeds_add():
     title = request.form.get('title')
     isolate_guids = request.form.get('isolate_guids', False)
     isolate_guids = stringtools.truthystring(isolate_guids)
-    feed = common.bringdb.add_feed(rss_url=rss_url, title=title, isolate_guids=isolate_guids)
+    with common.bringdb.transaction:
+        feed = common.bringdb.add_feed(rss_url=rss_url, title=title, isolate_guids=isolate_guids)
 
     # We want to refresh the feed now and not just put it on the refresh queue,
     # because when the user gets the response to this endpoint they will
@@ -44,12 +45,11 @@ def post_feeds_add():
     # ux. However, we need to commit first, because if the refresh fails we want
     # the user to be able to see the Feed in the ui and read its
     # last_refresh_error message.
-    common.bringdb.commit()
-    try:
-        feed.refresh()
-        common.bringdb.commit()
-    except Exception:
-        log.warning('Refreshing %s raised:\n%s', feed, traceback.format_exc())
+    with common.bringdb.transaction:
+        try:
+            feed.refresh()
+        except Exception:
+            log.warning('Refreshing %s raised:\n%s', feed, traceback.format_exc())
 
     return flasktools.json_response(feed.jsonify())
 
@@ -73,9 +73,9 @@ def get_feed_json(feed_id):
 
 @site.route('/feed/<feed_id>/delete', methods=['POST'])
 def post_feed_delete(feed_id):
-    feed = common.get_feed(feed_id, response_type='json')
-    feed.delete()
-    common.bringdb.commit()
+    with common.bringdb.transaction:
+        feed = common.get_feed(feed_id, response_type='json')
+        feed.delete()
     return flasktools.json_response({})
 
 @site.route('/feed/<feed_id>/icon.png')
@@ -122,16 +122,16 @@ def get_feed_settings(feed_id):
 @site.route('/feed/<feed_id>/set_autorefresh_interval', methods=['POST'])
 @flasktools.required_fields(['autorefresh_interval'])
 def post_feed_set_autorefresh_interval(feed_id):
-    feed = common.get_feed(feed_id, response_type='json')
     autorefresh_interval = request.form['autorefresh_interval']
     try:
         autorefresh_interval = int(autorefresh_interval)
     except ValueError:
         return flasktools.json_response({}, status=400)
 
+    feed = common.get_feed(feed_id, response_type='json')
     if autorefresh_interval != feed.autorefresh_interval:
-        feed.set_autorefresh_interval(autorefresh_interval)
-        common.bringdb.commit()
+        with common.bringdb.transaction:
+            feed.set_autorefresh_interval(autorefresh_interval)
         # Wake up the autorefresh thread so it can recalculate its schedule.
         common.AUTOREFRESH_THREAD_EVENTS.put("wake up!")
     return flasktools.json_response(feed.jsonify())
@@ -139,42 +139,42 @@ def post_feed_set_autorefresh_interval(feed_id):
 @site.route('/feed/<feed_id>/set_filters', methods=['POST'])
 @flasktools.required_fields(['filter_ids'])
 def post_feed_set_filters(feed_id):
-    feed = common.get_feed(feed_id, response_type='json')
     filter_ids = stringtools.comma_space_split(request.form['filter_ids'])
-    filters = [common.get_filter(id, response_type='json') for id in filter_ids]
-    feed.set_filters(filters)
-    common.bringdb.commit()
+    with common.bringdb.transaction:
+        feed = common.get_feed(feed_id, response_type='json')
+        filters = [common.get_filter(id, response_type='json') for id in filter_ids]
+        feed.set_filters(filters)
     return flasktools.json_response(feed.jsonify(filters=True))
 
 @site.route('/feed/<feed_id>/set_http_headers', methods=['POST'])
 @flasktools.required_fields(['http_headers'])
 def post_feed_set_http_headers(feed_id):
-    feed = common.get_feed(feed_id, response_type='json')
-    feed.set_http_headers(request.form['http_headers'])
-    common.bringdb.commit()
+    with common.bringdb.transaction:
+        feed = common.get_feed(feed_id, response_type='json')
+        feed.set_http_headers(request.form['http_headers'])
     return flasktools.json_response(feed.jsonify())
 
 @site.route('/feed/<feed_id>/set_icon', methods=['POST'])
 @flasktools.required_fields(['image_base64'])
 def post_feed_set_icon(feed_id):
-    feed = common.get_feed(feed_id, response_type='json')
     image_base64 = request.form['image_base64']
     image_base64 = image_base64.split(';base64,')[-1]
     image_binary = base64.b64decode(image_base64)
-    feed.set_icon(image_binary)
-    common.bringdb.commit()
+    with common.bringdb.transaction:
+        feed = common.get_feed(feed_id, response_type='json')
+        feed.set_icon(image_binary)
     return flasktools.json_response(feed.jsonify())
 
 @site.route('/feed/<feed_id>/set_isolate_guids', methods=['POST'])
 @flasktools.required_fields(['isolate_guids'])
 def post_feed_set_isolate_guids(feed_id):
-    feed = common.get_feed(feed_id, response_type='json')
     try:
         isolate_guids = stringtools.truthystring(request.form['isolate_guids'])
     except ValueError:
         return flasktools.json_response({}, status=400)
-    feed.set_isolate_guids(isolate_guids)
-    common.bringdb.commit()
+    with common.bringdb.transaction:
+        feed = common.get_feed(feed_id, response_type='json')
+        feed.set_isolate_guids(isolate_guids)
     return flasktools.json_response(feed.jsonify())
 
 @site.route('/feed/<feed_id>/set_parent', methods=['POST'])
@@ -193,8 +193,8 @@ def post_feed_set_parent(feed_id):
         ui_order_rank = float(ui_order_rank)
 
     if parent != feed.parent or ui_order_rank != feed.ui_order_rank:
-        feed.set_parent(parent, ui_order_rank=ui_order_rank)
-        common.bringdb.commit()
+        with common.bringdb.transaction:
+            feed.set_parent(parent, ui_order_rank=ui_order_rank)
 
     return flasktools.json_response(feed.jsonify())
 
@@ -204,8 +204,8 @@ def post_feed_set_refresh_with_others(feed_id):
     feed = common.get_feed(feed_id, response_type='json')
     refresh_with_others = stringtools.truthystring(request.form['refresh_with_others'])
     if refresh_with_others != feed.refresh_with_others:
-        feed.set_refresh_with_others(refresh_with_others)
-        common.bringdb.commit()
+        with common.bringdb.transaction:
+            feed.set_refresh_with_others(refresh_with_others)
     return flasktools.json_response(feed.jsonify())
 
 @site.route('/feed/<feed_id>/set_rss_url', methods=['POST'])
@@ -214,8 +214,8 @@ def post_feed_set_rss_url(feed_id):
     feed = common.get_feed(feed_id, response_type='json')
     rss_url = request.form['rss_url']
     if rss_url != feed.rss_url:
-        feed.set_rss_url(rss_url)
-        common.bringdb.commit()
+        with common.bringdb.transaction:
+            feed.set_rss_url(rss_url)
     return flasktools.json_response(feed.jsonify())
 
 @site.route('/feed/<feed_id>/set_web_url', methods=['POST'])
@@ -224,8 +224,8 @@ def post_feed_set_web_url(feed_id):
     feed = common.get_feed(feed_id, response_type='json')
     web_url = request.form['web_url']
     if web_url != feed.web_url:
-        feed.set_web_url(web_url)
-        common.bringdb.commit()
+        with common.bringdb.transaction:
+            feed.set_web_url(web_url)
     return flasktools.json_response(feed.jsonify())
 
 @site.route('/feed/<feed_id>/set_title', methods=['POST'])
@@ -234,8 +234,8 @@ def post_feed_set_title(feed_id):
     feed = common.get_feed(feed_id, response_type='json')
     title = request.form['title']
     if title != feed.title:
-        feed.set_title(title)
-        common.bringdb.commit()
+        with common.bringdb.transaction:
+            feed.set_title(title)
     return flasktools.json_response(feed.jsonify())
 
 @site.route('/feed/<feed_id>/set_ui_order_rank', methods=['POST'])
@@ -244,7 +244,7 @@ def post_feed_set_ui_order_rank(feed_id):
     feed = common.get_feed(feed_id, response_type='json')
     ui_order_rank = float(request.form['ui_order_rank'])
     if ui_order_rank != feed.ui_order_rank:
-        feed.set_ui_order_rank(ui_order_rank)
-        common.bringdb.reassign_ui_order_rank()
-        common.bringdb.commit()
+        with common.bringdb.transaction:
+            feed.set_ui_order_rank(ui_order_rank)
+            common.bringdb.reassign_ui_order_rank()
     return flasktools.json_response(feed.jsonify())

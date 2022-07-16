@@ -20,8 +20,8 @@ def bringrepl_argparse(args):
         return 1
 
     if args.exec_statement:
-        exec(args.exec_statement)
-        B.commit()
+        with B.transaction():
+            exec(args.exec_statement)
     else:
         while True:
             try:

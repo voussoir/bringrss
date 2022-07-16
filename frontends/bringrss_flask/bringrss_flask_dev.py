@@ -60,7 +60,7 @@ def bringrss_flask_dev(
         site.demo_mode = True
 
     if init:
-        bringrss.bringdb.BringDB(create=True).commit()
+        bringrss.bringdb.BringDB(create=True)
 
     try:
         backend.common.init_bringdb()

@@ -16,11 +16,11 @@ import bringrss
 log = vlogging.getLogger(__name__, 'import_quiterss')
 
 def import_quiterss_argparse(args):
-    bringdb = bringrss.bringdb.BringDB.closest_bringdb()
     if not os.path.isfile(args.feedsdb):
-        pipeable.stderr(f'{args.bringdb} is not a file.')
+        pipeable.stderr(f'{args.feedsdb} is not a file.')
         return 1
 
+    bringdb = bringrss.bringdb.BringDB.closest_bringdb()
     message = textwrap.dedent('''
     You should make a backup of your BringRSS database before doing this.
     Do not perform this import more than once. We will not search for duplicate data.
@@ -35,7 +35,13 @@ def import_quiterss_argparse(args):
     if not interactive.getpermission('Are you ready?'):
         return 1
 
-    quite_sql = sqlite3.connect(args.feedsdb)
+    with bringdb.transaction:
+        import_quiterss(feedsdb, bringdb)
+
+    return 0
+
+def import_quiterss(feedsdb, bringdb):
+    quite_sql = sqlite3.connect(feedsdb)
     quite_sql.row_factory = sqlite3.Row
     feed_id_map = {}
     query = '''
@@ -171,9 +177,6 @@ def import_quiterss_argparse(args):
         )
         if quite_read > 0:
             news.set_read(True)
-    bringdb.commit()
-
-    return 0
 
 @vlogging.main_decorator
 def main(argv):

@@ -3,21 +3,8 @@ import requests
 from voussoirkit import sqlhelpers
 
 DATABASE_VERSION = 1
-DB_VERSION_PRAGMA = f'''
-PRAGMA user_version = {DATABASE_VERSION};
-'''
-
-DB_PRAGMAS = f'''
--- 50 MB cache
-PRAGMA cache_size = -50000;
-PRAGMA foreign_keys = ON;
-'''
 
 DB_INIT = f'''
-BEGIN;
-{DB_PRAGMAS}
-{DB_VERSION_PRAGMA}
-----------------------------------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS feeds(
     id INT PRIMARY KEY NOT NULL,
     parent_id INT,
@@ -100,8 +87,6 @@ CREATE TABLE IF NOT EXISTS feed_filter_rel(
     FOREIGN KEY(filter_id) REFERENCES filters(id),
     PRIMARY KEY(feed_id, filter_id)
 );
-----------------------------------------------------------------------------------------------------
-COMMIT;
 '''
 SQL_COLUMNS = sqlhelpers.extract_table_column_map(DB_INIT)
 SQL_INDEX = sqlhelpers.reverse_table_column_map(SQL_COLUMNS)

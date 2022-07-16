@@ -25,7 +25,7 @@ class BDBFeedMixin:
     def __init__(self):
         super().__init__()
 
-    @worms.transaction
+    @worms.atomic
     def add_feed(
             self,
             *,
@@ -150,7 +150,7 @@ class BDBFeedMixin:
         query = 'SELECT * FROM feeds WHERE parent_id IS NULL ORDER BY ui_order_rank ASC'
         return self.get_objects_by_sql(objects.Feed, query)
 
-    @worms.transaction
+    @worms.atomic
     def reassign_ui_order_ranks(self):
         feeds = list(self.get_root_feeds())
         rank = 1
@@ -165,7 +165,7 @@ class BDBFilterMixin:
     def __init__(self):
         super().__init__()
 
-    @worms.transaction
+    @worms.atomic
     def add_filter(self, name, conditions, actions):
         name = objects.Filter.normalize_name(name)
         conditions = objects.Filter.normalize_conditions(conditions)
@@ -198,7 +198,7 @@ class BDBFilterMixin:
     def get_filters_by_sql(self, query, bindings=None) -> typing.Iterable[objects.Filter]:
         return self.get_objects_by_sql(objects.Filter, query, bindings)
 
-    @worms.transaction
+    @worms.atomic
     def process_news_through_filters(self, news):
         def prepare_filters(feed):
             filters = []
@@ -236,7 +236,7 @@ class BDBNewsMixin:
     def __init__(self):
         super().__init__()
 
-    @worms.transaction
+    @worms.atomic
     def add_news(
             self,
             *,
@@ -550,7 +550,7 @@ class BDBNewsMixin:
             if news is not BDBNewsMixin.DUPLICATE_BAIL:
                 yield news
 
-    @worms.transaction
+    @worms.atomic
     def ingest_news_xml(self, soup:bs4.BeautifulSoup, feed):
         if soup.rss:
             newss = self._ingest_news_rss(soup, feed)
@@ -619,7 +619,7 @@ class BringDB(
         Compare database's user_version against constants.DATABASE_VERSION,
         raising exceptions.DatabaseOutOfDate if not correct.
         '''
-        existing = self.execute('PRAGMA user_version').fetchone()[0]
+        existing = self.pragma_read('user_version')
         if existing != constants.DATABASE_VERSION:
             raise exceptions.DatabaseOutOfDate(
                 existing=existing,
@@ -629,8 +629,10 @@ class BringDB(
 
     def _first_time_setup(self):
         log.info('Running first-time database setup.')
-        self.executescript(constants.DB_INIT)
-        self.commit()
+        with self.transaction:
+            self._load_pragmas()
+            self.pragma_write('user_version', constants.DATABASE_VERSION)
+            self.executescript(constants.DB_INIT)
 
     def _init_caches(self):
         self.caches = {
@@ -652,21 +654,22 @@ class BringDB(
             raise FileNotFoundError(msg)
 
         self.data_directory.makedirs(exist_ok=True)
-        log.debug('Connecting to sqlite file "%s".', self.database_filepath.absolute_path)
-        self.sql = sqlite3.connect(self.database_filepath.absolute_path)
-        self.sql.row_factory = sqlite3.Row
+        self.sql_read = self._make_sqlite_read_connection(self.database_filepath)
+        self.sql_write = self._make_sqlite_write_connection(self.database_filepath)
 
         if existing_database:
             if not skip_version_check:
                 self._check_version()
-            self._load_pragmas()
+            with self.transaction:
+                self._load_pragmas()
         else:
             self._first_time_setup()
 
     def _load_pragmas(self):
         log.debug('Reloading pragmas.')
-        self.executescript(constants.DB_PRAGMAS)
-        self.commit()
+        # 50 MB cache
+        self.pragma_write('cache_size', -50000)
+        self.pragma_write('foreign_keys', 'on')
 
     @classmethod
     def closest_bringdb(cls, path='.', *args, **kwargs):
@@ -717,6 +720,5 @@ class BringDB(
 
         while True:
             id = RNG.getrandbits(32)
-            exists = self.select_one(f'SELECT 1 FROM {table} WHERE id == ?', [id])
-            if not exists:
+            if not self.exists(f'SELECT 1 FROM {table} WHERE id == ?', [id]):
                 return id

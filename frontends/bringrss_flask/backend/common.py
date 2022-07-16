@@ -251,7 +251,6 @@ def refresh_queue_thread():
             feed.refresh()
         except Exception as exc:
             log.warning('Refreshing %s encountered:\n%s', feed, traceback.format_exc())
-        bringdb.commit()
         flasktools.send_sse(
             event='feed_refresh_finished',
             data=json.dumps(feed.jsonify(unread_count=True)),
@@ -262,7 +261,8 @@ def refresh_queue_thread():
         feed = REFRESH_QUEUE.get()
         if feed is QUIT_EVENT:
             break
-        _refresh_one(feed)
+        with bringdb.transaction:
+            _refresh_one(feed)
         _REFRESH_QUEUE_SET.discard(feed)
         if REFRESH_QUEUE.empty():
             flasktools.send_sse(event='feed_refresh_queue_finished', data='')

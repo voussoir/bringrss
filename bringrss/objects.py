@@ -171,7 +171,7 @@ class Feed(ObjectBase):
 
     normalize_web_url = helpers.normalize_string_blank_to_none
 
-    @worms.transaction
+    @worms.atomic
     def clear_last_refresh_error(self):
         if self.last_refresh_error is None:
             return
@@ -183,7 +183,7 @@ class Feed(ObjectBase):
         self.bringdb.update(table=Feed, pairs=pairs, where_key='id')
         self.last_refresh_error = None
 
-    @worms.transaction
+    @worms.atomic
     def delete(self):
         self.assert_not_deleted()
 
@@ -375,7 +375,7 @@ class Feed(ObjectBase):
                 if web_url:
                     self.set_web_url(web_url)
 
-    @worms.transaction
+    @worms.atomic
     def _refresh(self):
         soup = helpers.fetch_xml_cached(self.rss_url, headers=self.http_headers)
 
@@ -397,7 +397,7 @@ class Feed(ObjectBase):
         }
         self.bringdb.update(table=Feed, pairs=pairs, where_key='id')
 
-    @worms.transaction
+    @worms.atomic
     def refresh(self):
         if not self.rss_url:
             self.clear_last_refresh_error()
@@ -424,7 +424,7 @@ class Feed(ObjectBase):
         self.bringdb.update(table=Feed, pairs=pairs, where_key='id')
         return ret
 
-    @worms.transaction
+    @worms.atomic
     def refresh_all(self):
         '''
         Refresh this feed and all of its descendants, except the ones with
@@ -441,7 +441,7 @@ class Feed(ObjectBase):
             except Exception:
                 log.warning(traceback.format_exc())
 
-    @worms.transaction
+    @worms.atomic
     def set_autorefresh_interval(self, autorefresh_interval):
         self.assert_not_deleted()
         autorefresh_interval = self.normalize_autorefresh_interval(autorefresh_interval)
@@ -453,7 +453,7 @@ class Feed(ObjectBase):
         self.bringdb.update(table=Feed, pairs=pairs, where_key='id')
         self.autorefresh_interval = autorefresh_interval
 
-    @worms.transaction
+    @worms.atomic
     def set_description(self, description):
         self.assert_not_deleted()
         description = self.normalize_description(description)
@@ -479,7 +479,7 @@ class Feed(ObjectBase):
                 except Exception:
                     log.warning(traceback.format_exc())
 
-    @worms.transaction
+    @worms.atomic
     def set_filters(self, filters):
         self.assert_not_deleted()
 
@@ -504,7 +504,7 @@ class Feed(ObjectBase):
             }
             self.bringdb.insert(table='feed_filter_rel', data=data)
 
-    @worms.transaction
+    @worms.atomic
     def set_http_headers(self, http_headers):
         self.assert_not_deleted()
         http_headers = self.normalize_http_headers(http_headers)
@@ -516,7 +516,7 @@ class Feed(ObjectBase):
         self.bringdb.update(table=Feed, pairs=pairs, where_key='id')
         self.http_headers = http_headers
 
-    @worms.transaction
+    @worms.atomic
     def set_icon(self, icon:bytes):
         self.assert_not_deleted()
         icon = self.normalize_icon(icon)
@@ -528,7 +528,7 @@ class Feed(ObjectBase):
         self.bringdb.update(table=Feed, pairs=pairs, where_key='id')
         self.icon = icon
 
-    @worms.transaction
+    @worms.atomic
     def set_isolate_guids(self, isolate_guids):
         self.assert_not_deleted()
         isolate_guids = self.normalize_isolate_guids(isolate_guids)
@@ -550,7 +550,7 @@ class Feed(ObjectBase):
         self.bringdb.update(table=News, pairs=pairs, where_key='original_feed_id')
         self.isolate_guids = isolate_guids
 
-    @worms.transaction
+    @worms.atomic
     def set_parent(self, parent, ui_order_rank=None):
         self.assert_not_deleted()
         if parent is None:
@@ -586,7 +586,7 @@ class Feed(ObjectBase):
         if parent is not None:
             self._parent = parent
 
-    @worms.transaction
+    @worms.atomic
     def set_refresh_with_others(self, refresh_with_others):
         self.assert_not_deleted()
         refresh_with_others = self.normalize_refresh_with_others(refresh_with_others)
@@ -598,7 +598,7 @@ class Feed(ObjectBase):
         self.bringdb.update(table=Feed, pairs=pairs, where_key='id')
         self.refresh_with_others = refresh_with_others
 
-    @worms.transaction
+    @worms.atomic
     def set_rss_url(self, rss_url):
         self.assert_not_deleted()
         rss_url = self.normalize_rss_url(rss_url)
@@ -610,7 +610,7 @@ class Feed(ObjectBase):
         self.bringdb.update(table=Feed, pairs=pairs, where_key='id')
         self.rss_url = rss_url
 
-    @worms.transaction
+    @worms.atomic
     def set_title(self, title):
         self.assert_not_deleted()
         title = self.normalize_title(title)
@@ -622,7 +622,7 @@ class Feed(ObjectBase):
         self.bringdb.update(table=Feed, pairs=pairs, where_key='id')
         self.title = title
 
-    @worms.transaction
+    @worms.atomic
     def set_ui_order_rank(self, ui_order_rank):
         self.assert_not_deleted()
         ui_order_rank = self.normalize_ui_order_rank(ui_order_rank)
@@ -634,7 +634,7 @@ class Feed(ObjectBase):
         self.bringdb.update(table=Feed, pairs=pairs, where_key='id')
         self.ui_order_rank = ui_order_rank
 
-    @worms.transaction
+    @worms.atomic
     def set_web_url(self, web_url):
         self.assert_not_deleted()
         web_url = self.normalize_web_url(web_url)
@@ -1044,7 +1044,7 @@ class Filter(ObjectBase):
 
     ##
 
-    @worms.transaction
+    @worms.atomic
     def delete(self):
         self.assert_not_deleted()
 
@@ -1118,7 +1118,7 @@ class Filter(ObjectBase):
         conditions.map(lambda token: Filter._parse_stored_condition(token, run_validator=run_validator))
         return conditions
 
-    @worms.transaction
+    @worms.atomic
     def process_news(self, news):
         # Because we called self.conditions.map(parse_stored_condition), all of
         # the tokens inside the ExpressionTree are now partialed functions that
@@ -1143,7 +1143,7 @@ class Filter(ObjectBase):
 
         return Filter.THEN_CONTINUE_FILTERS
 
-    @worms.transaction
+    @worms.atomic
     def set_actions(self, actions:str):
         self.assert_not_deleted()
         actions = self.normalize_actions(actions)
@@ -1157,7 +1157,7 @@ class Filter(ObjectBase):
         self._actions = actions
         self.actions = self.parse_actions(actions)
 
-    @worms.transaction
+    @worms.atomic
     def set_conditions(self, conditions:str):
         self.assert_not_deleted()
         # Note that the database is given the input string, not the normalize
@@ -1172,7 +1172,7 @@ class Filter(ObjectBase):
         self._conditions = conditions
         self.conditions = self.parse_conditions(conditions)
 
-    @worms.transaction
+    @worms.atomic
     def set_name(self, name):
         self.assert_not_deleted()
         name = self.normalize_name(name)
@@ -1371,7 +1371,7 @@ class News(ObjectBase):
 
         return j
 
-    @worms.transaction
+    @worms.atomic
     def move_to_feed(self, feed):
         self.assert_not_deleted()
 
@@ -1407,7 +1407,7 @@ class News(ObjectBase):
         published = published.strftime('%Y-%m-%d %H:%M')
         return published
 
-    @worms.transaction
+    @worms.atomic
     def set_read(self, read):
         self.assert_not_deleted()
         read = self.normalize_read(read)
@@ -1419,7 +1419,7 @@ class News(ObjectBase):
         self.bringdb.update(table=News, pairs=pairs, where_key='id')
         self.read = read
 
-    @worms.transaction
+    @worms.atomic
     def set_recycled(self, recycled):
         self.assert_not_deleted()
         recycled = self.normalize_recycled(recycled)

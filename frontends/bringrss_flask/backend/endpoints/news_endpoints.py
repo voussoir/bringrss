@@ -16,9 +16,8 @@ site = common.site
 def post_news_set_read(news_id):
     news = common.get_news(news_id, response_type='json')
     read = stringtools.truthystring(request.form['read'])
-    news.set_read(read)
-
-    common.bringdb.commit()
+    with common.bringdb.transaction:
+        news.set_read(read)
     return flasktools.json_response(news.jsonify())
 
 @site.route('/news/<news_id>/set_recycled', methods=['POST'])
@@ -26,9 +25,8 @@ def post_news_set_read(news_id):
 def post_news_set_recycled(news_id):
     news = common.get_news(news_id, response_type='json')
     recycled = stringtools.truthystring(request.form['recycled'])
-    news.set_recycled(recycled)
-
-    common.bringdb.commit()
+    with common.bringdb.transaction:
+        news.set_recycled(recycled)
     return flasktools.json_response(news.jsonify())
 
 @site.route('/news/<news_id>.json', methods=['GET'])
@@ -42,8 +40,8 @@ def post_get_news(news_id):
     mark_read = request.form.get('set_read', None)
     mark_read = stringtools.truthystring(mark_read)
     if mark_read is not None:
-        news.set_read(mark_read)
-        common.bringdb.commit()
+        with common.bringdb.transaction:
+            news.set_read(mark_read)
     return flasktools.json_response(news.jsonify(complete=True))
 
 @site.route('/batch/news/set_read', methods=['POST'])
@@ -57,11 +55,11 @@ def post_batch_set_read():
     read = stringtools.truthystring(request.form['read'])
 
     return_ids = []
-    for news in newss:
-        news.set_read(read)
-        return_ids.append(news.id)
+    with common.bringdb.transaction:
+        for news in newss:
+            news.set_read(read)
+            return_ids.append(news.id)
 
-    common.bringdb.commit()
     return flasktools.json_response(return_ids)
 
 @site.route('/batch/news/set_recycled', methods=['POST'])
@@ -75,9 +73,9 @@ def post_batch_recycle_news():
     recycled = stringtools.truthystring(request.form['recycled'])
 
     return_ids = []
-    for news in newss:
-        news.set_recycled(recycled)
-        return_ids.append(news.id)
+    with common.bringdb.transaction:
+        for news in newss:
+            news.set_recycled(recycled)
+            return_ids.append(news.id)
 
-    common.bringdb.commit()
     return flasktools.json_response(return_ids)
