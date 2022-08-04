@@ -132,7 +132,7 @@ class Feed(ObjectBase):
             frame_height=32,
             only_shrink=True,
         )
-        icon = icon.resize((new_w, new_h), PIL.Image.ANTIALIAS)
+        icon = icon.resize((new_w, new_h), PIL.Image.LANCZOS)
         bio = io.BytesIO()
         icon.save(bio, format='png')
         bio.seek(0)
