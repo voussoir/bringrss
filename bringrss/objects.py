@@ -502,7 +502,7 @@ class Feed(ObjectBase):
                 'filter_id': filt.id,
                 'order_rank': index + 1,
             }
-            self.bringdb.insert(table='feed_filter_rel', data=data)
+            self.bringdb.insert(table='feed_filter_rel', pairs=data)
 
     @worms.atomic
     def set_http_headers(self, http_headers):

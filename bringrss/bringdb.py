@@ -79,7 +79,7 @@ class BDBFeedMixin:
             'icon': icon,
             'ui_order_rank': ui_order_rank,
         }
-        self.insert(table=objects.Feed, data=data)
+        self.insert(table=objects.Feed, pairs=data)
         feed = self.get_cached_instance(objects.Feed, data)
         return feed
 
@@ -179,7 +179,7 @@ class BDBFilterMixin:
             'conditions': conditions,
             'actions': actions,
         }
-        self.insert(table=objects.Filter, data=data)
+        self.insert(table=objects.Filter, pairs=data)
         filt = self.get_cached_instance(objects.Filter, data)
         return filt
 
@@ -285,7 +285,7 @@ class BDBNewsMixin:
             'authors': authors,
             'enclosures': enclosures,
         }
-        self.insert(table=objects.News, data=data)
+        self.insert(table=objects.News, pairs=data)
         news = self.get_cached_instance(objects.News, data)
         return news
 
