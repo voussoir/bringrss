@@ -345,6 +345,7 @@ function update_filter_form(event)
         // typed something else.
         if (name_input.value === name)
         {
+            name_header.innerText = response.data.name;
             name_input.value = response.data.name;
         }
         if (conditions_input.value === conditions)
@@ -360,6 +361,7 @@ function update_filter_form(event)
     const filter = button.closest(".filter");
     clear_error_message(filter);
 
+    const name_header = filter.querySelector(".name_header");
     const name_input = filter.querySelector(".set_name_input");
     const conditions_input = filter.querySelector(".set_conditions_input");
     const actions_input = filter.querySelector(".set_actions_input");
