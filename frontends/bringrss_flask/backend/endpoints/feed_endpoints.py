@@ -111,6 +111,7 @@ def get_feed_settings(feed_id):
     feed_filters = list(feed.get_filters())
     available_filters = set(common.bringdb.get_filters())
     available_filters.difference_update(feed_filters)
+    available_filters = sorted(available_filters, key=lambda filt:filt.name.lower())
     return common.render_template(
         request,
         'feed_settings.html',
