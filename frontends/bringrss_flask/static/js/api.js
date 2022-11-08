@@ -102,13 +102,14 @@ function set_isolate_guids(feed_id, isolate_guids, callback)
 api.feeds.set_parent =
 function set_parent(feed_id, parent_id, ui_order_rank, callback)
 {
+    data = {"parent_id": parent_id};
     if (ui_order_rank !== null)
     {
         data["ui_order_rank"] = ui_order_rank;
     }
     return http.post({
         url: `/feed/${feed_id}/set_parent`,
-        data: {"parent_id": parent_id},
+        data: data,
         callback: callback,
     });
 }
