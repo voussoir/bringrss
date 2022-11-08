@@ -1193,6 +1193,7 @@ class News(ObjectBase):
 
         self.id = db_row['id']
         self.feed_id = db_row['feed_id']
+        self.original_feed_id = db_row['original_feed_id']
         self.rss_guid = db_row['rss_guid']
         self.published = db_row['published']
         self.updated = db_row['updated']
