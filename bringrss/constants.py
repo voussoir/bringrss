@@ -13,13 +13,13 @@ CREATE TABLE IF NOT EXISTS feeds(
     title TEXT,
     description TEXT,
     created INT,
-    refresh_with_others INT NOT NULL,
+    refresh_with_others BOOLEAN NOT NULL,
     last_refresh INT NOT NULL,
     last_refresh_attempt INT NOT NULL,
     last_refresh_error TEXT,
     autorefresh_interval INT NOT NULL,
     http_headers TEXT,
-    isolate_guids INT NOT NULL,
+    isolate_guids BOOLEAN NOT NULL,
     icon BLOB,
     ui_order_rank INT
 );
