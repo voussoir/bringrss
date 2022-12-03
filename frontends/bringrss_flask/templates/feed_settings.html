@@ -53,16 +53,11 @@ h1:first-child
     width: 3em;
     text-align: right;
 }
-.group
-{
-    border:  1px solid var(--color_highlight);
-    border-radius: 4px;
-    padding: 4px;
-}
 #filters_group h2:first-child,
 .group h2:first-child
 {
     margin-top: 0;
+    margin-bottom: 0;
 }
 
 #filters .filter
@@ -124,111 +119,112 @@ h1:first-child
             <input id="set_icon_input" type="file"/>
             <button id="set_icon_button" class="button_with_spinner" data-spinner-text="⌛" onclick="return set_icon_form(event)">Set icon</button>
         </div>
+    </div>
 
-        {% set autorefresh_group_hidden = '' if feed.rss_url else 'hidden' %}
-        <div id="autorefresh_group" class="group {{autorefresh_group_hidden}}">
-            {% set checked = 'checked' if feed.autorefresh_interval > 0 else '' %}
-            <span>
-            <label><input type="checkbox" {{checked}} onchange="return set_autorefresh_enabled_form(event);"/> Automatically refresh this feed regularly.</label>
-            <span id="set_autorefresh_enabled_spinner" class="hidden">⌛</span>
-            </span>
+    {% set autorefresh_group_hidden = '' if feed.rss_url else 'hidden' %}
+    <div id="autorefresh_group" class="group panel {{autorefresh_group_hidden}}">
+        {% set checked = 'checked' if feed.autorefresh_interval > 0 else '' %}
+        <span>
+        <label><input type="checkbox" {{checked}} onchange="return set_autorefresh_enabled_form(event);"/> Automatically refresh this feed regularly.</label>
+        <span id="set_autorefresh_enabled_spinner" class="hidden">⌛</span>
+        </span>
 
-            {% set autorefresh_interval_hidden = '' if checked else 'hidden' %}
-            <p id="set_autorefresh_interval_inputs" class="{{autorefresh_interval_hidden}}">
-                {% set interval = feed.autorefresh_interval|abs %}
-                {% set hours = (interval / 3600)|int %}
-                {% set minutes = ((interval % 3600) / 60)|int %}
-                Refresh every
-                <input type="number" min="0" id="autorefresh_input_hours" size="4" value="{{hours}}"/> hours,
-                <input type="number" min="0" id="autorefresh_input_minutes" size="4" value="{{minutes}}"/> minutes
-                <button class="button_with_spinner" data-spinner-text="⌛" onclick="return set_autorefresh_interval_form(event);">Set autorefresh</button>
-            </p>
-            <p>Note: autorefresh is not inherited from parent to child. When you manually click the refresh button on a parent, its children will also be refreshed, but if the parent is refreshed automatically, the children will wait for their own autorefresh.</p>
+        {% set autorefresh_interval_hidden = '' if checked else 'hidden' %}
+        <p id="set_autorefresh_interval_inputs" class="{{autorefresh_interval_hidden}}">
+            {% set interval = feed.autorefresh_interval|abs %}
+            {% set hours = (interval / 3600)|int %}
+            {% set minutes = ((interval % 3600) / 60)|int %}
+            Refresh every
+            <input type="number" min="0" id="autorefresh_input_hours" size="4" value="{{hours}}"/> hours,
+            <input type="number" min="0" id="autorefresh_input_minutes" size="4" value="{{minutes}}"/> minutes
+            <button class="button_with_spinner" data-spinner-text="⌛" onclick="return set_autorefresh_interval_form(event);">Set autorefresh</button>
+        </p>
+        <p>Note: autorefresh is not inherited from parent to child. When you manually click the refresh button on a parent, its children will also be refreshed, but if the parent is refreshed automatically, the children will wait for their own autorefresh.</p>
 
-            {% if feed.last_refresh %}
-            <p>Last refresh: {{feed.last_refresh|timestamp_to_8601_local}}</p>
-            {% endif %}
+        {% if feed.last_refresh %}
+        <p>Last refresh: {{feed.last_refresh|timestamp_to_8601_local}}</p>
+        {% endif %}
 
-            {% if feed.next_refresh < INF %}
-            <p>Next refresh: {{feed.next_refresh|timestamp_to_8601_local}}</p>
-            {% endif %}
+        {% if feed.next_refresh < INF %}
+        <p>Next refresh: {{feed.next_refresh|timestamp_to_8601_local}}</p>
+        {% endif %}
 
-            {% if feed.last_refresh_error %}
-            <p>The last refresh attempt at {{feed.last_refresh_attempt|timestamp_to_8601_local}} encountered the following error:</p>
-            <pre>
-                {{-feed.last_refresh_error|trim-}}
-            </pre>
-            {% endif %}
-        </div>
+        {% if feed.last_refresh_error %}
+        <p>The last refresh attempt at {{feed.last_refresh_attempt|timestamp_to_8601_local}} encountered the following error:</p>
+        <pre>
+            {{-feed.last_refresh_error|trim-}}
+        </pre>
+        {% endif %}
+    </div>
 
-        <div class="group">
-            {% set checked = 'checked' if feed.refresh_with_others else '' %}
-            <span>
-                <label><input type="checkbox" {{checked}} onchange="return set_refresh_with_others_form(event);"/> Refresh this feed and its children when I refresh its parent or press the "Refresh all" button.</label>
-                <span id="set_refresh_with_others_spinner" class="hidden">⌛</span>
-            </span>
-            <p>If disabled, this feed will only be refreshed when you click its own refresh button, or when its autorefresh timer is ready.</p>
-        </div>
+    <div class="group panel">
+        {% set checked = 'checked' if feed.refresh_with_others else '' %}
+        <span>
+            <label><input type="checkbox" {{checked}} onchange="return set_refresh_with_others_form(event);"/> Refresh this feed and its children when I refresh its parent or press the "Refresh all" button.</label>
+            <span id="set_refresh_with_others_spinner" class="hidden">⌛</span>
+        </span>
+        <p>If disabled, this feed will only be refreshed when you click its own refresh button, or when its autorefresh timer is ready.</p>
+    </div>
 
-        <div id="isolate_guids_group" class="group">
-            {% set checked = 'checked' if feed.isolate_guids else '' %}
-            <span>
-            <label><input type="checkbox" {{checked}} onchange="return set_isolate_guids_form(event);"/> Isolate RSS GUIDs from other feeds.</label>
-            <span id="set_isolate_guids_spinner" class="hidden">⌛</span>
-            </span>
-            <p>When feeds are refreshed, the system uses GUIDs and other news attributes to detect which items are new and which are duplicates from the previous refresh.</p>
-            <p>If the feed is isolated, the GUIDs will only be used to search for duplicates within this feed. If the feed is not isolated, the GUIDs will be used to search for duplicates among all news in the database.</p>
-            <p>If you have two feeds that may produce the same items (e.g. two newspaper category feeds, and a news article belongs to both categories), this setting will control whether the news item appears in both feeds or just the one that got it first.</p>
-        </div>
+    <div id="isolate_guids_group" class="group panel">
+        {% set checked = 'checked' if feed.isolate_guids else '' %}
+        <span>
+        <label><input type="checkbox" {{checked}} onchange="return set_isolate_guids_form(event);"/> Isolate RSS GUIDs from other feeds.</label>
+        <span id="set_isolate_guids_spinner" class="hidden">⌛</span>
+        </span>
+        <p>When feeds are refreshed, the system uses GUIDs and other news attributes to detect which items are new and which are duplicates from the previous refresh.</p>
+        <p>If the feed is isolated, the GUIDs will only be used to search for duplicates within this feed. If the feed is not isolated, the GUIDs will be used to search for duplicates among all news in the database.</p>
+        <p>If you have two feeds that may produce the same items (e.g. two newspaper category feeds, and a news article belongs to both categories), this setting will control whether the news item appears in both feeds or just the one that got it first.</p>
+    </div>
 
-        <div id="filters_group" class="group">
-            <h2>Filters</h2>
-            <p>Filters will execute in the order they are listed here:</p>
-            <div id="filter_rearrange_guideline"></div>
-            <div
-                id="filters"
-                ondragstart="return filter_drag_start(event);"
-                ondragend="return filter_drag_end(event);"
-                ondragover="return filter_drag_over(event);"
-                ondragenter="return filter_drag_enter(event);"
-                ondragleave="return filter_drag_leave(event);"
-                ondrop="return filter_drag_drop(event);"
-            >
-                {% for filt in feed_filters %}
-                <div class="filter" data-id="{{filt.id}}" draggable="true">
-                <span class="name">{{filt.display_name}}</span>
-                <a class="edit_link" href="/filter/{{filt.id}}">Edit</a>
-                <button
-                class="red_button button_with_confirm"
-                data-prompt="Remove this filter?"
-                data-onclick="return remove_filter_form(event);"
-                >Remove</button>
-                </div>
-                {% endfor %}
-            </div>
-            <select id="add_filter_select" onchange="return add_filter_form(event);">
-                <option value="">Add another filter</option>
-                {% for filt in available_filters %}
-                <option value="{{filt.id}}">{{filt.display_name}}</option>
-                {% endfor %}
-            </select>
-            <span id="set_filters_spinner" class="hidden">⌛</span>
-        </div>
-
-        {% set http_headers_hidden = '' if feed.rss_url else 'hidden' %}
-        <div id="http_headers_group" class="group {{http_headers_hidden}}">
-            <p>If you need to define additional HTTP headers which will be sent on every refresh request for this feed, you can add them below. Write one header per line like <code>Key: value</code>, e.g. <code>Host: example.com</code></p>
-            <textarea id="set_http_headers_input" placeholder="HTTP headers" data-bind-ctrl-enter-to-button="set_http_headers_button">{{feed.http_headers|http_headers_dict_to_lines}}</textarea>
-            <button id="set_http_headers_button" class="button_with_spinner" data-spinner-text="⌛" onclick="return set_http_headers_form(event);">Set HTTP headers</button>
-        </div>
-
-        <div>
+    <div id="filters_group" class="group panel">
+        <h2>Filters</h2>
+        <p>Filters will execute in the order they are listed here:</p>
+        <div id="filter_rearrange_guideline"></div>
+        <div
+            id="filters"
+            ondragstart="return filter_drag_start(event);"
+            ondragend="return filter_drag_end(event);"
+            ondragover="return filter_drag_over(event);"
+            ondragenter="return filter_drag_enter(event);"
+            ondragleave="return filter_drag_leave(event);"
+            ondrop="return filter_drag_drop(event);"
+        >
+            {% for filt in feed_filters %}
+            <div class="filter" data-id="{{filt.id}}" draggable="true">
+            <span class="name">{{filt.display_name}}</span>
+            <a class="edit_link" href="/filter/{{filt.id}}">Edit</a>
             <button
             class="red_button button_with_confirm"
-            data-prompt="Delete feed and all associated news?"
-            data-onclick="return delete_feed_form(event);"
-            >Delete feed</button>
+            data-prompt="Remove this filter?"
+            data-onclick="return remove_filter_form(event);"
+            >Remove</button>
+            </div>
+            {% endfor %}
         </div>
+        <select id="add_filter_select" onchange="return add_filter_form(event);">
+            <option value="">Add another filter</option>
+            {% for filt in available_filters %}
+            <option value="{{filt.id}}">{{filt.display_name}}</option>
+            {% endfor %}
+        </select>
+        <span id="set_filters_spinner" class="hidden">⌛</span>
+    </div>
+
+    {% set http_headers_hidden = '' if feed.rss_url else 'hidden' %}
+    <div id="http_headers_group" class="group panel {{http_headers_hidden}}">
+        <h2>HTTP Headers</h2>
+        <p>If you need to define additional HTTP headers which will be sent on every refresh request for this feed, you can add them below. Write one header per line like <code>Key: value</code>, e.g. <code>Host: example.com</code></p>
+        <textarea id="set_http_headers_input" placeholder="HTTP headers" data-bind-ctrl-enter-to-button="set_http_headers_button">{{feed.http_headers|http_headers_dict_to_lines}}</textarea>
+        <button id="set_http_headers_button" class="button_with_spinner" data-spinner-text="⌛" onclick="return set_http_headers_form(event);">Set HTTP headers</button>
+    </div>
+
+    <div class="panel">
+        <button
+        class="red_button button_with_confirm"
+        data-prompt="Delete feed and all associated news?"
+        data-onclick="return delete_feed_form(event);"
+        >Delete feed</button>
     </div>
 </div>
 </body>

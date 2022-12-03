@@ -15,6 +15,10 @@
     <script src="/static/js/spinners.js"></script>
 
 <style>
+html
+{
+    height: 100vh;
+}
 h2:first-child
 {
     margin-top: 0;
@@ -55,6 +59,10 @@ h2:first-child
     flex-direction: column;
     gap: 8px;
 }
+#left ::-webkit-scrollbar-track
+{
+    background-color: pink;
+}
 .filter textarea
 {
     min-width: 300px;
@@ -79,6 +87,7 @@ h2:first-child
     border-radius: 4px;
     padding: 4px;
     overflow-x: auto;
+    white-space: pre-line;
 }
 </style>
 </head>

@@ -13,3 +13,8 @@ p:last-child
 {
     margin-bottom: 0;
 }
+
+.navigation_link:hover
+{
+    background-color: var(--color_secondary);
+}
