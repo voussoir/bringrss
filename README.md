@@ -141,6 +141,8 @@ I am aware of virtual scrolling techniques where DOM rows don't actually exist u
 
 ## Mirrors
 
+https://git.voussoir.net/voussoir/bringrss
+
 https://github.com/voussoir/bringrss
 
 https://gitlab.com/voussoir/bringrss
