@@ -1397,14 +1397,20 @@ class News(ObjectBase):
     @property
     def published_string(self):
         published = self.published
-        published = datetime.datetime.utcfromtimestamp(published)
+        if published < 0:
+            published = datetime.datetime.utcfromtimestamp(0) + datetime.timedelta(seconds=published)
+        else:
+            published = datetime.datetime.utcfromtimestamp(published)
         published = published.strftime('%Y-%m-%d %H:%M')
         return published
 
     @property
     def published_string_local(self):
         published = self.published
-        published = datetime.datetime.fromtimestamp(published)
+        if published < 0:
+            published = datetime.datetime.fromtimestamp(0) + datetime.timedelta(seconds=published)
+        else:
+            published = datetime.datetime.fromtimestamp(published)
         published = published.strftime('%Y-%m-%d %H:%M')
         return published
 
