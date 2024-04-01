@@ -1348,6 +1348,7 @@ function news_unread_indicator_click(event)
     else
     {
         api.news.set_read(news.dataset.id, false, callback);
+        delete stored_news_objects[news.dataset.id];
         mark_unread_and_propagate_unread_delta(news);
     }
     event.stopPropagation();
