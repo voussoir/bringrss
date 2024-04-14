@@ -1195,7 +1195,6 @@ class News(ObjectBase):
         self.feed_id = db_row['feed_id']
         self.original_feed_id = db_row['original_feed_id']
         self.rss_guid = db_row['rss_guid']
-        self.published = db_row['published']
         self.updated = db_row['updated']
         self.title = db_row['title']
         self.text = db_row['text']
@@ -1204,6 +1203,13 @@ class News(ObjectBase):
         self.created = db_row['created']
         self.read = db_row['read']
         self.recycled = db_row['recycled']
+
+        self.published_unix = db_row['published']
+        # utcfromtimestamp doesn't like negative numbers, but timedelta can
+        # handle it, so this does better than just calling
+        # utcfromtimestamp(published)
+        self.published = datetime.datetime.utcfromtimestamp(0) + datetime.timedelta(seconds=self.published_unix)
+
         if db_row['authors']:
             self.authors = json.loads(db_row['authors'])
         else:
@@ -1357,7 +1363,7 @@ class News(ObjectBase):
             'created': self.created,
             'enclosures': self.enclosures,
             'feed_id': self.feed_id,
-            'published': self.published,
+            'published_unix': self.published_unix,
             'published_string': self.published_string,
             'published_string_local': self.published_string_local,
             'read': self.read,
@@ -1396,23 +1402,12 @@ class News(ObjectBase):
 
     @property
     def published_string(self):
-        published = self.published
-        if published < 0:
-            published = datetime.datetime.utcfromtimestamp(0) + datetime.timedelta(seconds=published)
-        else:
-            published = datetime.datetime.utcfromtimestamp(published)
-        published = published.strftime('%Y-%m-%d %H:%M')
+        published = self.published.strftime('%Y-%m-%d %H:%M')
         return published
 
     @property
     def published_string_local(self):
-        published = self.published
-        if published < 0:
-            published = datetime.datetime.fromtimestamp(0) + datetime.timedelta(seconds=published)
-        else:
-            published = datetime.datetime.fromtimestamp(published)
-        published = published.strftime('%Y-%m-%d %H:%M')
-        return published
+        return self.published.astimezone().strftime('%Y-%m-%d %H:%M')
 
     @worms.atomic
     def set_read(self, read):
