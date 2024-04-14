@@ -1,6 +1,10 @@
 import flask; from flask import request
+import traceback
 
 from voussoirkit import flasktools
+from voussoirkit import vlogging
+
+log = vlogging.get_logger(__name__)
 
 from .. import common
 
@@ -77,15 +81,19 @@ def post_run_filter_now(filter_id):
     else:
         feed = None
 
-    with common.bringdb.transaction:
-        filt = common.get_filter(filter_id, response_type='json')
-        newss = list(common.bringdb.get_newss(
-            feed=feed,
-            read=None,
-            recycled=None,
-        ))
-        for news in newss:
-            filt.process_news(news)
+    try:
+        with common.bringdb.transaction:
+            filt = common.get_filter(filter_id, response_type='json')
+            newss = list(common.bringdb.get_newss(
+                feed=feed,
+                read=None,
+                recycled=None,
+            ))
+            log.info('Running %s.', filt)
+            for news in newss:
+                filt.process_news(news)
+    except Exception as exc:
+        log.warning('Running %s raised:\n%s', filt, traceback.format_exc())
 
     return flasktools.json_response({})
 
