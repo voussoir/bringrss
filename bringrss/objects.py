@@ -1067,7 +1067,7 @@ class Filter(ObjectBase):
         if self.name is not None:
             return self.name
 
-        return self.id
+        return str(self.id)
 
     def jsonify(self):
         self.assert_not_deleted()
