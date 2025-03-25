@@ -298,7 +298,7 @@ body
 {
     text-decoration: line-through;
 }
-#news .news:nth-of-type(even)
+#news .news:not(.hidden):nth-of-type(even)
 {
     background-color: var(--color_transparency);
 }
@@ -426,9 +426,10 @@ body
             <button onclick="return mark_selected_unread(event);">Mark unread</button>
             <button id="set_show_recycled_button" onclick="return set_show_recycled_form(event);">Show recycled</button>
             <button id="set_show_read_button" onclick="return set_show_read_form(event);">Show read</button>
-            <button id="set_show_unread_button" onclick="return set_show_unread_form(event);">Show unread</button>
+            <button id="set_show_unread_button" onclick="return set_show_unread_onclick(event);">Show unread</button>
             <span id="active_feed_title"></span>
             <span id="news_loading_spinner" class="hidden">⌛</span>
+            <input type="text" id="dynamic_filter_input" placeholder="filter" oninput="return dynamic_filter_oninput(event);"/>
         </div>
 
         <hr/>
@@ -458,6 +459,8 @@ const newsreader_news_title = document.getElementById("newsreader_news_title");
 const newsreader_feedname = document.getElementById("newsreader_feedname");
 const newsreader_enclosure = document.getElementById("newsreader_enclosure");
 const newsreader_news_text = document.getElementById("newsreader_news_text");
+
+const dynamic_filter_input = document.getElementById("dynamic_filter_input");
 
 const feed_rearrange_guideline = document.getElementById("feed_rearrange_guideline");
 
@@ -1382,7 +1385,7 @@ function set_show_recycled_form(event)
     document.getElementById("set_show_recycled_button").classList.add("bold");
 }
 
-function set_show_unread_form(event)
+function set_show_unread_onclick(event)
 {
     let params = new URLSearchParams(window.location.search);
     params.delete("read");
@@ -1398,6 +1401,33 @@ function set_show_unread_form(event)
     document.getElementById("set_show_read_button").classList.remove("bold");
     document.getElementById("set_show_unread_button").classList.add("bold");
     document.getElementById("set_show_recycled_button").classList.remove("bold");
+}
+
+let dynamic_filter_timeout = null;
+function dynamic_filter_oninput(event)
+{
+    clearTimeout(dynamic_filter_timeout);
+    dynamic_filter_timeout = setTimeout(dynamic_filter_news, 666);
+}
+
+function dynamic_filter_news()
+{
+    const searchterm = dynamic_filter_input.value.trim().toLocaleLowerCase();
+    // console.log(searchterm);
+    const newss = document.getElementById("news").querySelectorAll(".news");
+    for (const news of newss)
+    {
+        const title = news.querySelector(".title").innerText.toLocaleLowerCase();
+        // console.log(title);
+        if (title.indexOf(searchterm) >= 0)
+        {
+            news.classList.remove("hidden");
+        }
+        else
+        {
+            news.classList.add("hidden");
+        }
+    }
 }
 
 let show_news_batch_timeout;
@@ -1449,6 +1479,7 @@ function show_newss(newss)
         }
     }
     show_batch();
+    dynamic_filter_news();
 }
 
 // NEWS SELECTION //////////////////////////////////////////////////////////////////////////////////
