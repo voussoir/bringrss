@@ -115,6 +115,8 @@ h2:first-child
 
             <button id="{{filt.id}}_update_button" class="set_actions_button button_with_spinner" data-spinner-text="⌛" onclick="return update_filter_form(event);">Update</button>
 
+            <button id="{{filt.id}}_copy_button" onclick="return copy_filter_form(event);">Copy</button>
+
             <button
             class="red_button button_with_confirm"
             data-prompt="Delete filter?"
@@ -282,6 +284,35 @@ function add_filter_form(event)
     api.filters.add_filter(name, conditions, actions, callback);
 }
 
+function copy_filter_form(event)
+{
+    function callback(response)
+    {
+        if (! response.meta.json_ok)
+        {
+            alert(JSON.stringify(response));
+            return;
+        }
+        if (response.data.type === "error")
+        {
+            show_error_message(filter, `${response.data.error_type}: ${response.data.error_message}`);
+            return;
+        }
+        if (response.meta.status != 200)
+        {
+            alert(JSON.stringify(response));
+            return;
+        }
+        common.refresh();
+    }
+    const button = event.target;
+    const filter = button.closest(".filter");
+
+    const name = filter.querySelector(".set_name_input").value.trim() + " copy";
+    const conditions = filter.querySelector(".set_conditions_input").value.trim();
+    const actions = filter.querySelector(".set_actions_input").value.trim();
+    api.filters.add_filter(name, conditions, actions, callback);
+}
 function clear_error_message(filter)
 {
     const p = filter.getElementsByClassName("error_message")[0];
