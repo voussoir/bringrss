@@ -3,6 +3,7 @@ requests
 
 # For parsing RSS and Atom XML
 bs4
+lxml
 
 # For parsing RSS published times
 python-dateutil
