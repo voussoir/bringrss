@@ -124,7 +124,7 @@ It is expected that you create a shortcut file or launch script so you don't hav
 
 ## Help wanted: javascript perf & layout thrashing
 
-I think there is room for improvement in [root.html](https://github.com/voussoir/bringrss/blob/master/frontends/bringrss_flask/templates/root.html)'s javascript. When reading a feed with a few thousand news items, the UI starts to get slow at every interaction:
+I think there is room for improvement in [root.html](https://git.voussoir.net/voussoir/bringrss/blob/master/frontends/bringrss_flask/templates/root.html)'s javascript. When reading a feed with a few thousand news items, the UI starts to get slow at every interaction:
 
 - After clicking on a news, it takes a few ms before it turns selected.
 - The newsreader takes a few ms to populate with the title even though it's pulled from the news's DOM, not the network.
@@ -136,7 +136,7 @@ I am aware of virtual scrolling techniques where DOM rows don't actually exist u
 
 ## To do list
 
-- Maybe we could add a very basic password system to facilitate running an internet-connected instance. No user profiles, just a single password to access the whole system. I did this with [simpleserver](https://github.com/voussoir/else/blob/master/SimpleServer/simpleserver.py).
+- Maybe we could add a very basic password system to facilitate running an internet-connected instance. No user profiles, just a single password to access the whole system. I did this with [simpleserver](https://git.voussoir.net/else/blob/master/SimpleServer/simpleserver.py).
 - "Fill in the gaps" feature. Many websites have feeds that don't reach back all the way to their first post. When discovering a new blog or podcast, catching up on their prior work requires manual bookmarking outside of your newsreader. It would be nice to dump a list of article URLs into BringRSS and have it generate news objects as if they really came from the feed. Basic information like url, title, and fetched page text would be good enough; auto-detecting media as enclosures would be better. Other attributes don't need to be comprehensive. Then you could have everything in your newsreader.
 
 ## Mirrors
