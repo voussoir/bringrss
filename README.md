@@ -3,7 +3,7 @@ BringRSS
 
 It brings you the news.
 
-Live demo: https://bringrss.voussoir.net
+<!-- Live demo: https://bringrss.voussoir.net -->
 
 ## What am I looking at
 
