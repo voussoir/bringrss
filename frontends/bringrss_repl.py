@@ -34,7 +34,6 @@ def bringrepl_argparse(args):
             if interactive.getpermission():
                 break
 
-@vlogging.main_decorator
 def main(argv):
     parser = argparse.ArgumentParser()
 

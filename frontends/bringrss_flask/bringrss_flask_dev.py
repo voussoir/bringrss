@@ -92,7 +92,7 @@ def bringrss_flask_dev_argparse(args):
     )
 
 @operatornotify.main_decorator(subject='bringrss_flask_dev', notify_every_line=True)
-@vlogging.main_decorator
+@vlogging.main_decorator(log=log)
 def main(argv):
     parser = argparse.ArgumentParser(
         description='''

@@ -9,7 +9,7 @@ from voussoirkit import vlogging
 
 import bringrss
 
-log = vlogging.getLogger(__name__, 'bringrss')
+log = vlogging.getLogger(__name__, 'bringrss_cli')
 
 bringdb = None
 def load_bringdb():
@@ -47,7 +47,7 @@ def refresh_all_argparse(args):
             feed.refresh()
 
 @operatornotify.main_decorator(subject='bringrss_cli')
-@vlogging.main_decorator
+@vlogging.main_decorator(log=log)
 def main(argv):
     parser = argparse.ArgumentParser(
         description='''
