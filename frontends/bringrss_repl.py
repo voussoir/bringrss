@@ -20,7 +20,7 @@ def bringrepl_argparse(args):
         return 1
 
     if args.exec_statement:
-        with B.transaction():
+        with B.transaction:
             exec(args.exec_statement)
     else:
         while True:
