@@ -303,7 +303,7 @@ def init_bringdb(*args, **kwargs):
             classes = [cls for (name, cls) in vars(module).items() if isinstance(cls, type)]
             for cls in classes:
                 for (name, attribute) in vars(cls).items():
-                    if getattr(attribute, 'is_worms_transaction', False) is True:
+                    if getattr(attribute, 'is_worms_atomic', False) is True:
                         setattr(cls, name, do_nothing)
                         print(cls, name, 'DO NOTHING')
 

@@ -610,11 +610,24 @@ class BringDB(
             raise exceptions.BadDataDirectory(self.data_directory.absolute_path)
 
         # DATABASE / WORMS
-        self._init_sql(create=create, skip_version_check=skip_version_check)
+        self.database_filepath = self.data_directory.with_child(constants.DEFAULT_DBNAME)
+        existing_database = self.database_filepath.exists
+
+        if not existing_database and not create:
+            msg = f'"{self.database_filepath.absolute_path}" does not exist and create is off.'
+            raise FileNotFoundError(msg)
+
+        self.data_directory.makedirs(exist_ok=True)
+        self.connect(self.database_filepath)
+
+        if existing_database:
+            if not skip_version_check:
+                self._check_version()
+        else:
+            self._first_time_setup()
 
         # WORMS
         self.id_type = int
-        self._init_column_index()
         self._init_caches()
 
     def _check_version(self):
@@ -622,7 +635,7 @@ class BringDB(
         Compare database's user_version against constants.DATABASE_VERSION,
         raising exceptions.DatabaseOutOfDate if not correct.
         '''
-        existing = self.pragma_read('user_version')
+        existing = self.pragma_read_one('user_version')
         if existing != constants.DATABASE_VERSION:
             raise exceptions.DatabaseOutOfDate(
                 existing=existing,
@@ -633,9 +646,8 @@ class BringDB(
     def _first_time_setup(self):
         log.info('Running first-time database setup.')
         with self.transaction:
-            self._load_pragmas()
             self.pragma_write('user_version', constants.DATABASE_VERSION)
-            self.executescript(constants.DB_INIT)
+            self.execute_script(constants.DB_INIT)
 
     def _init_caches(self):
         self.caches = {
@@ -643,36 +655,6 @@ class BringDB(
             objects.Filter: cacheclass.Cache(maxlen=1000),
             objects.News: cacheclass.Cache(maxlen=20000),
         }
-
-    def _init_column_index(self):
-        self.COLUMNS = constants.SQL_COLUMNS
-        self.COLUMN_INDEX = constants.SQL_INDEX
-
-    def _init_sql(self, create, skip_version_check):
-        self.database_filepath = self.data_directory.with_child(constants.DEFAULT_DBNAME)
-        existing_database = self.database_filepath.exists
-
-        if not existing_database and not create:
-            msg = f'"{self.database_filepath.absolute_path}" does not exist and create is off.'
-            raise FileNotFoundError(msg)
-
-        self.data_directory.makedirs(exist_ok=True)
-        self.sql_read = self._make_sqlite_read_connection(self.database_filepath)
-        self.sql_write = self._make_sqlite_write_connection(self.database_filepath)
-
-        if existing_database:
-            if not skip_version_check:
-                self._check_version()
-            with self.transaction:
-                self._load_pragmas()
-        else:
-            self._first_time_setup()
-
-    def _load_pragmas(self):
-        log.debug('Reloading pragmas.')
-        # 50 MB cache
-        self.pragma_write('cache_size', -50000)
-        self.pragma_write('foreign_keys', 'on')
 
     @classmethod
     def closest_bringdb(cls, path='.', *args, **kwargs):
@@ -703,9 +685,6 @@ class BringDB(
         )
         return bringdb
 
-    def __del__(self):
-        self.close()
-
     def __repr__(self):
         return f'BringDB(data_directory={self.data_directory})'
 
@@ -723,5 +702,5 @@ class BringDB(
 
         while True:
             id = RNG.getrandbits(32)
-            if not self.exists(f'SELECT 1 FROM {table} WHERE id == ?', [id]):
+            if not self.select_exists(f'SELECT 1 FROM {table} WHERE id == ?', [id]):
                 return id

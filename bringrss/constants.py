@@ -88,8 +88,6 @@ CREATE TABLE IF NOT EXISTS feed_filter_rel(
     PRIMARY KEY(feed_id, filter_id)
 );
 '''
-SQL_COLUMNS = sqlhelpers.extract_table_column_map(DB_INIT)
-SQL_INDEX = sqlhelpers.reverse_table_column_map(SQL_COLUMNS)
 
 DEFAULT_DATADIR = '_bringrss'
 DEFAULT_DBNAME = 'bringrss.db'

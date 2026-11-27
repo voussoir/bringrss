@@ -1,15 +1,14 @@
 '''
-This file is the gevent launcher for local / development use.
+This file is the launcher for local / development use.
 '''
-import gevent.monkey; gevent.monkey.patch_all()
-import werkzeug.middleware.proxy_fix
-
 import argparse
-import gevent.pywsgi
 import os
 import sys
+import werkzeug.serving
+werkzeug.serving._log_add_style = False
 
 from voussoirkit import betterhelp
+from voussoirkit import flasktools
 from voussoirkit import operatornotify
 from voussoirkit import pathclass
 from voussoirkit import vlogging
@@ -20,10 +19,7 @@ import bringrss
 import backend
 
 site = backend.site
-site.wsgi_app = werkzeug.middleware.proxy_fix.ProxyFix(site.wsgi_app)
 site.debug = True
-
-HTTPS_DIR = pathclass.Path(__file__).parent.with_child('https')
 
 ####################################################################################################
 
@@ -33,24 +29,7 @@ def bringrss_flask_dev(
         localhost_only,
         init,
         port,
-        use_https,
     ):
-    if use_https is None:
-        use_https = port == 443
-
-    if use_https:
-        http = gevent.pywsgi.WSGIServer(
-            listener=('0.0.0.0', port),
-            application=site,
-            keyfile=HTTPS_DIR.with_child('bringrss.key').absolute_path,
-            certfile=HTTPS_DIR.with_child('bringrss.crt').absolute_path,
-        )
-    else:
-        http = gevent.pywsgi.WSGIServer(
-            listener=('0.0.0.0', port),
-            application=site,
-        )
-
     if localhost_only:
         log.info('Setting localhost_only = True')
         site.localhost_only = True
@@ -70,17 +49,22 @@ def bringrss_flask_dev(
         return 1
 
     message = f'Starting server on port {port}, pid={os.getpid()}.'
-    if use_https:
-        message += ' (https)'
     log.info(message)
 
     backend.common.start_background_threads()
 
     try:
-        http.serve_forever()
+        site.run(
+            host='0.0.0.0',
+            port=port,
+            threaded=True,
+            debug=True,
+            use_reloader=False,
+            request_handler=flasktools.MyWSGIRequestHandler,
+        )
+        return 0
     except KeyboardInterrupt:
         log.info('Goodbye')
-        return 0
 
 def bringrss_flask_dev_argparse(args):
     return bringrss_flask_dev(
@@ -88,7 +72,6 @@ def bringrss_flask_dev_argparse(args):
         localhost_only=args.localhost_only,
         init=args.init,
         port=args.port,
-        use_https=args.use_https,
     )
 
 @operatornotify.main_decorator(subject='bringrss_flask_dev', notify_every_line=True)
@@ -106,17 +89,6 @@ def main(argv):
         default=27464,
         help='''
         Port number on which to run the server.
-        ''',
-    )
-    parser.add_argument(
-        '--https',
-        dest='use_https',
-        action='store_true',
-        help='''
-        If this flag is not passed, HTTPS will automatically be enabled if the
-        port is 443. You can pass this flag to enable HTTPS on other ports.
-        We expect to find bringrss.key and bringrss.crt in
-        frontends/bringrss_flask/https.
         ''',
     )
     parser.add_argument(
